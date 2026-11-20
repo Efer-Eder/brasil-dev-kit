@@ -24,3 +24,5 @@ projeto adota o [Versionamento Semântico](https://semver.org/lang/pt-BR/).
   endereço normalizado com procedência (`fonte`) e utilitários de formato
   (`isValidCepFormat`, `normalizeCep`, `formatCep`, `assertCep`).
 - Testes de integração opcionais (`pnpm test:integration`) e workflow semanal.
+- UFs e municípios pela API de Localidades do IBGE (`createIbgeClient`, com
+  `listUfs` e `listMunicipios`), além de `resolveUf` e `UF_CODES`.

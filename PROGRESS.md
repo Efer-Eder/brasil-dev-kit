@@ -1,5 +1,39 @@
 # Progresso
 
+## 2026-11-20 — Etapa 3: UFs e municípios (IBGE)
+
+**Status:** implementado (IBGE). Feriados ainda não existem.
+
+### Feito
+
+- Documentação oficial lida em <https://servicodados.ibge.gov.br/api/docs/localidades>
+  (a página bloqueia `curl`/fetch automatizado com 403; foi lida em navegador).
+- Respostas reais gravadas em `tests/fixtures/ibge/api/`: 27 UFs; municípios de
+  RR (15), MT (142) e DF (1); UF inexistente (`[]`).
+- `src/providers/ibge.ts` e `src/modules/ibge`: `createIbgeClient()` com
+  `listUfs()` e `listMunicipios(uf)`, ordenados por nome; `resolveUf` e
+  `UF_CODES` (tabela fixa, conferida por teste contra a resposta real).
+- Testes de integração para IBGE; exemplo `examples/node/ibge.mjs`; `docs/ibge.md`.
+
+### Verificação local
+
+- `pnpm run check` — lint, typecheck, 131 testes unitários e build OK.
+- `pnpm test:integration` — 6 testes OK (CEP + IBGE) contra as APIs reais.
+
+### Decisões
+
+- Chamamos a API com o código numérico da UF (formato dos exemplos oficiais);
+  a sigla é convertida localmente e UFs inválidas falham sem requisição.
+- `codigoIbge` como `string`, igual ao `codigoIbgeMunicipio` do módulo de CEP.
+- `microrregiao`/`mesorregiao` podem ser `null` (caso real: Boa Esperança do
+  Norte/MT); `regiaoImediata`/`regiaoIntermediaria` vieram em todos os municípios.
+
+### Próximo passo objetivo
+
+**Feriados nacionais:** escolher fonte verificada (legislação federal ou provedor
+documentado), separar feriados oficiais de pontos facultativos e registrar
+origem/licença e ano de referência.
+
 ## 2026-11-20 — Etapa 2: consulta de CEP
 
 **Status:** implementado (CEP); IBGE e feriados ainda não existem.

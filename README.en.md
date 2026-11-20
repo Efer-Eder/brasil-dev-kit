@@ -21,7 +21,8 @@ clear data provenance.
 | HTTP client with timeout, `AbortSignal` and typed errors    | ✅ implemented and tested |
 | Numeric and **alphanumeric** CNPJ validation (check digits) | ✅ implemented and tested |
 | CEP lookup (ViaCEP and BrasilAPI, with fallback)            | ✅ implemented and tested |
-| IBGE municipalities/states, national holidays               | 🗓️ planned                |
+| States and municipalities (IBGE Localidades API)            | ✅ implemented and tested |
+| National holidays                                           | 🗓️ planned                |
 | Retries with backoff and in-memory cache                    | 🗓️ planned                |
 
 ## CEP lookup
@@ -45,6 +46,18 @@ await cep.lookup('00000-000'); // throws NotFoundError
 
 > Lookups hit free third-party services with no availability guarantee. ViaCEP
 > may block heavy users: do not use this to validate whole CEP databases.
+
+## States and municipalities (IBGE)
+
+Data from IBGE's official Localidades API. Details (in Portuguese): [docs/ibge.md](docs/ibge.md).
+
+```ts
+import { createIbgeClient } from 'brasil-dev-kit';
+
+const ibge = createIbgeClient();
+const ufs = await ibge.listUfs(); // 27 states with region, sorted by name
+const municipios = await ibge.listMunicipios('RR'); // or by code: 14
+```
 
 ## CNPJ validation
 
@@ -94,6 +107,7 @@ pnpm test
 pnpm build
 node examples/node/cnpj.mjs
 node examples/node/cep.mjs 01310-100
+node examples/node/ibge.mjs RR
 ```
 
 Without a global pnpm, replace `pnpm` with `npx pnpm@12.21.0`.

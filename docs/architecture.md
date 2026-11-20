@@ -1,13 +1,13 @@
 # Arquitetura
 
-> Estado em 20/11/2026: existem `core` (HTTP + erros) e os módulos `cnpj` e `cep`.
+> Estado em 20/11/2026: existem `core` (HTTP + erros) e os módulos `cnpj`, `cep` e `ibge`.
 > As demais pastas estão reservadas para os próximos passos (ver `ROADMAP.md`).
 
 ```text
 src/
   core/        # cliente HTTP, erros tipados (cache e retries: planejados)
-  providers/   # clientes por fonte de dados: viacep, brasilapi (CEP)
-  modules/     # API pública por domínio: cnpj, cep (prontos); ibge, feriados (planejados)
+  providers/   # clientes por fonte de dados: viacep, brasilapi (CEP), ibge
+  modules/     # API pública por domínio: cnpj, cep, ibge (prontos); feriados (planejado)
   index.ts     # ponto de entrada público
 tests/
   unit/        # testes sem rede (fetch falso e fixtures)

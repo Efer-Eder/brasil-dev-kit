@@ -20,7 +20,8 @@ SDK **TypeScript-first** para consumir e padronizar dados públicos brasileiros
 | Cliente HTTP com timeout, `AbortSignal` e erros tipados               | ✅ implementado e testado |
 | Validação de CNPJ numérico e **alfanumérico** (dígitos verificadores) | ✅ implementado e testado |
 | Consulta de CEP (ViaCEP e BrasilAPI, com fallback)                    | ✅ implementado e testado |
-| Municípios/UFs (IBGE), feriados nacionais                             | 🗓️ planejado              |
+| UFs e municípios (API de Localidades do IBGE)                         | ✅ implementado e testado |
+| Feriados nacionais                                                    | 🗓️ planejado              |
 | Retries com backoff e cache em memória                                | 🗓️ planejado              |
 
 ## Consulta de CEP
@@ -44,6 +45,21 @@ await cep.lookup('00000-000'); // lança NotFoundError
 > As consultas vão para serviços públicos de terceiros, sem garantia de
 > disponibilidade. O ViaCEP pode bloquear quem faz uso massivo: não use para
 > validar bases inteiras de CEPs.
+
+## UFs e municípios (IBGE)
+
+Dados da API de Localidades do IBGE, a fonte oficial. Detalhes em [docs/ibge.md](docs/ibge.md).
+
+```ts
+import { createIbgeClient } from 'brasil-dev-kit';
+
+const ibge = createIbgeClient();
+
+const ufs = await ibge.listUfs(); // 27 UFs com região, ordenadas por nome
+const municipios = await ibge.listMunicipios('RR'); // ou pelo código: 14
+// [{ codigoIbge: '1400050', nome: 'Alto Alegre', uf: 'RR', microrregiao: {…},
+//    mesorregiao: {…}, regiaoImediata: {…}, regiaoIntermediaria: {…} }, …]
+```
 
 ## Validação de CNPJ
 
@@ -101,6 +117,7 @@ pnpm test
 pnpm build
 node examples/node/cnpj.mjs
 node examples/node/cep.mjs 01310-100
+node examples/node/ibge.mjs RR
 ```
 
 Sem instalar o pnpm globalmente, troque `pnpm` por `npx pnpm@12.21.0`.
@@ -112,6 +129,7 @@ Scripts disponíveis: `build`, `lint`, `lint:fix`, `typecheck`, `test`,
 - [Arquitetura](docs/architecture.md)
 - [Regras de CNPJ e fontes oficiais](docs/cnpj.md)
 - [Consulta de CEP: provedores, fallback e limites](docs/cep.md)
+- [UFs e municípios (IBGE)](docs/ibge.md)
 - [Decisões técnicas (ADRs)](docs/adr/)
 - [Progresso](PROGRESS.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md)
 
