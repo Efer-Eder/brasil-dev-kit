@@ -74,30 +74,29 @@ pnpm build
 ```
 
 ```ts
-import {
-  createCepClient,
-  createIbgeClient,
-  getFeriadosNacionais,
-  validateCnpj,
-  NotFoundError,
-} from 'brasil-dev-kit';
+import { createBrasilDevKit, NotFoundError } from 'brasil-dev-kit';
 
-const cep = createCepClient({ timeoutMs: 8000, cacheTtlMs: 60_000 });
+// Opções comuns valem para todos os módulos; cada um pode sobrescrever as suas.
+const br = createBrasilDevKit({ timeoutMs: 8000, cacheTtlMs: 60_000 });
 
 try {
-  const endereco = await cep.lookup('01310-100');
+  const endereco = await br.cep.lookup('01310-100');
   // { uf: 'SP', municipio: 'São Paulo', logradouro: 'Avenida Paulista', fonte: { provedor: 'viacep' }, ... }
 } catch (error) {
   if (error instanceof NotFoundError) console.log('CEP não existe');
 }
 
-// Falha passageira (rede, 5xx, timeout, 429) é repetida com backoff exponencial e jitter.
-const ibge = createIbgeClient({ retry: { retries: 3, maxDelayMs: 4000 }, cacheTtlMs: 86_400_000 });
-
-await ibge.listMunicipios('RR'); // 15 municípios, ordenados por nome
-getFeriadosNacionais(2026).origem; // 'portaria': feriados + pontos facultativos oficiais
-validateCnpj('12.ABC.345/01DE-35').kind; // 'alphanumeric'
+await br.ibge.listMunicipios('RR'); // 15 municípios, ordenados por nome
+br.feriados.getNacionais(2026).origem; // 'portaria': feriados + pontos facultativos oficiais
+br.feriados.isFeriado('2026-11-20'); // true
+br.cnpj.validate('12.ABC.345/01DE-35').kind; // 'alphanumeric'
 ```
+
+Falha passageira (rede, 5xx, timeout, 429) é repetida com backoff exponencial e
+jitter. Ajuste por módulo, por exemplo
+`createBrasilDevKit({ retry: { retries: 3 }, cep: { providers: ['brasilapi'] } })`.
+Cada módulo também pode ser usado sozinho (`createCepClient`, `createIbgeClient`,
+`getFeriadosNacionais`, `validateCnpj`…).
 
 > [!IMPORTANT]
 > A validação de CNPJ confere **apenas formato e dígitos verificadores**. Ela não

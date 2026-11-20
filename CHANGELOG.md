@@ -40,5 +40,8 @@ projeto adota o [Versionamento Semântico](https://semver.org/lang/pt-BR/).
   respeitam `Retry-After` e o cancelamento, e cache TTL opcional em memória
   (`cache`, ou `cacheTtlMs` nos clientes de CEP e IBGE) com junção de pedidos
   simultâneos.
+- Fachada `createBrasilDevKit()`: `cep`, `ibge`, `feriados` e `cnpj` num objeto só,
+  com opções comuns (`timeoutMs`, `retry`, `cacheTtlMs`, `fetch`, `userAgent`) e
+  sobrescrita por módulo.
 - README pt-BR/en-US com GIFs animados gerados a partir de saídas reais
   (`scripts/readme-gifs/`).

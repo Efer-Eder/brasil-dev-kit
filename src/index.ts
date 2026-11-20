@@ -24,6 +24,12 @@ export {
   retryDelay,
 } from './core/http.js';
 export {
+  type BrasilDevKit,
+  type BrasilDevKitOptions,
+  type BrasilDevKitSharedOptions,
+  createBrasilDevKit,
+} from './kit.js';
+export {
   assertCep,
   type CepClient,
   type CepClientOptions,

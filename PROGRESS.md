@@ -1,5 +1,21 @@
 # Progresso
 
+## 2026-11-20 — Etapa 9: fachada createBrasilDevKit()
+
+- `src/kit.ts`: `createBrasilDevKit(options)` devolve um objeto imutável com
+  `cep` (CepClient), `ibge` (IbgeClient), `feriados` (`getNacionais`,
+  `isFeriado`, `buscar`) e `cnpj` (`validate`, `isValid`, `format`,
+  `normalize`, `computeCheckDigits`). Opções comuns valem para CEP e IBGE;
+  `cep`/`ibge` sobrescrevem só o módulo; chaves `undefined` não apagam as comuns.
+- 5 testes novos; exemplo `examples/node/kit.mjs`; READMEs com a fachada como
+  forma principal de uso.
+- Primeira entrega pelo fluxo novo da main (branch + PR + merge automático).
+
+### Próximo passo objetivo
+
+Definir o nome do pacote no npm (verificar disponibilidade) e preparar
+changesets e o primeiro release `v0.1.0` contra os critérios de aceite.
+
 ## 2026-11-20 — Etapa 8: retries com backoff e cache no core
 
 - `src/core/http.ts`: `retry` (padrão 2 tentativas extras, backoff exponencial com
