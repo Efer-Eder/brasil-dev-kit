@@ -8,7 +8,7 @@ no branch `main`.
 ## Como relatar uma vulnerabilidade
 
 **Não abra uma issue pública.** Use o recurso
-[*Report a vulnerability*](https://github.com/Efer-Eder/brasil-dev-kit/security/advisories/new)
+[_Report a vulnerability_](https://github.com/Efer-Eder/brasil-dev-kit/security/advisories/new)
 (GitHub Private Vulnerability Reporting) deste repositório.
 
 Inclua, se possível: descrição, impacto, passos para reproduzir e versão/commit

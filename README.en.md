@@ -16,12 +16,12 @@ clear data provenance.
 
 ## What works today
 
-| Feature | Status |
-| --- | --- |
-| HTTP client with timeout, `AbortSignal` and typed errors | ✅ implemented and tested |
+| Feature                                                     | Status                    |
+| ----------------------------------------------------------- | ------------------------- |
+| HTTP client with timeout, `AbortSignal` and typed errors    | ✅ implemented and tested |
 | Numeric and **alphanumeric** CNPJ validation (check digits) | ✅ implemented and tested |
-| CEP, IBGE municipalities/states, national holidays | 🗓️ planned |
-| Retries with backoff and in-memory cache | 🗓️ planned |
+| CEP, IBGE municipalities/states, national holidays          | 🗓️ planned                |
+| Retries with backoff and in-memory cache                    | 🗓️ planned                |
 
 ## CNPJ validation
 

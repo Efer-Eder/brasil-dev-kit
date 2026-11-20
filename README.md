@@ -15,12 +15,12 @@ SDK **TypeScript-first** para consumir e padronizar dados públicos brasileiros
 
 ## O que já funciona
 
-| Recurso | Estado |
-| --- | --- |
-| Cliente HTTP com timeout, `AbortSignal` e erros tipados | ✅ implementado e testado |
+| Recurso                                                               | Estado                    |
+| --------------------------------------------------------------------- | ------------------------- |
+| Cliente HTTP com timeout, `AbortSignal` e erros tipados               | ✅ implementado e testado |
 | Validação de CNPJ numérico e **alfanumérico** (dígitos verificadores) | ✅ implementado e testado |
-| CEP, municípios/UFs (IBGE), feriados nacionais | 🗓️ planejado |
-| Retries com backoff e cache em memória | 🗓️ planejado |
+| CEP, municípios/UFs (IBGE), feriados nacionais                        | 🗓️ planejado              |
+| Retries com backoff e cache em memória                                | 🗓️ planejado              |
 
 ## Validação de CNPJ
 
