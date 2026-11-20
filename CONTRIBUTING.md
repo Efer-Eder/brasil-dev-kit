@@ -25,7 +25,18 @@ pnpm run check   # lint + typecheck + testes + build
    dados documentada.
 4. Rode `pnpm run check` antes de abrir o _pull request_.
 5. Use mensagens no padrão [Conventional Commits](https://www.conventionalcommits.org/)
-   (`feat:`, `fix:`, `docs:`, `chore:`, `test:`, `refactor:`…).
+   (`feat:`, `fix:`, `docs:`, `chore:`, `test:`, `refactor:`…). O título do PR
+   segue o mesmo padrão, porque vira o commit na `main`.
+
+### Como a `main` é protegida
+
+- Nada entra na `main` sem _pull request_.
+- O PR só pode ser mesclado com os 5 checks verdes: lint, typecheck, testes e
+  build em Ubuntu e Windows (Node 22 e 24), mais a varredura de segredos
+  (gitleaks).
+- Não é possível apagar a `main` nem reescrever o histórico dela (push forçado).
+- O merge é automático quando os checks passam, e o branch do PR é apagado em
+  seguida.
 
 ## Regras do projeto
 
