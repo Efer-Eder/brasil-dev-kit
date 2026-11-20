@@ -1,17 +1,17 @@
 # Arquitetura
 
-> Estado em 20/11/2026: apenas `core` (HTTP + erros) e o módulo `cnpj` existem.
+> Estado em 20/11/2026: existem `core` (HTTP + erros) e os módulos `cnpj` e `cep`.
 > As demais pastas estão reservadas para os próximos passos (ver `ROADMAP.md`).
 
 ```text
 src/
   core/        # cliente HTTP, erros tipados (cache e retries: planejados)
-  providers/   # clientes específicos por fonte de dados (planejado)
-  modules/     # API pública por domínio: cnpj (pronto), cep, ibge, feriados (planejados)
+  providers/   # clientes por fonte de dados: viacep, brasilapi (CEP)
+  modules/     # API pública por domínio: cnpj, cep (prontos); ibge, feriados (planejados)
   index.ts     # ponto de entrada público
 tests/
   unit/        # testes sem rede (fetch falso e fixtures)
-  integration/ # testes opcionais contra fontes reais (planejado; não bloqueiam o CI)
+  integration/ # testes opcionais contra fontes reais (não bloqueiam o CI)
   fixtures/    # dados gravados/sintéticos, sempre com origem documentada
 examples/
   node/        # exemplos executáveis

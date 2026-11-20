@@ -19,8 +19,31 @@ SDK **TypeScript-first** para consumir e padronizar dados públicos brasileiros
 | --------------------------------------------------------------------- | ------------------------- |
 | Cliente HTTP com timeout, `AbortSignal` e erros tipados               | ✅ implementado e testado |
 | Validação de CNPJ numérico e **alfanumérico** (dígitos verificadores) | ✅ implementado e testado |
-| CEP, municípios/UFs (IBGE), feriados nacionais                        | 🗓️ planejado              |
+| Consulta de CEP (ViaCEP e BrasilAPI, com fallback)                    | ✅ implementado e testado |
+| Municípios/UFs (IBGE), feriados nacionais                             | 🗓️ planejado              |
 | Retries com backoff e cache em memória                                | 🗓️ planejado              |
+
+## Consulta de CEP
+
+Usa o ViaCEP e, se ele estiver indisponível, o BrasilAPI. O resultado é
+normalizado e informa de qual provedor veio. Detalhes em [docs/cep.md](docs/cep.md).
+
+```ts
+import { createCepClient, NotFoundError } from 'brasil-dev-kit';
+
+const cep = createCepClient({ timeoutMs: 8000 });
+
+const endereco = await cep.lookup('01310-100');
+// { cep: '01310100', uf: 'SP', municipio: 'São Paulo', bairro: 'Bela Vista',
+//   logradouro: 'Avenida Paulista', complemento: 'de 612 a 1510 - lado par',
+//   codigoIbgeMunicipio: '3550308', fonte: { provedor: 'viacep', servicoOrigem: null } }
+
+await cep.lookup('00000-000'); // lança NotFoundError
+```
+
+> As consultas vão para serviços públicos de terceiros, sem garantia de
+> disponibilidade. O ViaCEP pode bloquear quem faz uso massivo: não use para
+> validar bases inteiras de CEPs.
 
 ## Validação de CNPJ
 
@@ -45,7 +68,7 @@ formatCnpj('11222333000181'); // '11.222.333/0001-81'
 
 ## Cliente HTTP
 
-Base para os futuros adaptadores de dados. Usa o `fetch` nativo, sem dependências.
+Base dos adaptadores de dados (usado pelo módulo de CEP). Usa o `fetch` nativo, sem dependências.
 
 ```ts
 import { createHttpClient, TimeoutError, NotFoundError } from 'brasil-dev-kit';
@@ -77,6 +100,7 @@ pnpm install
 pnpm test
 pnpm build
 node examples/node/cnpj.mjs
+node examples/node/cep.mjs 01310-100
 ```
 
 Sem instalar o pnpm globalmente, troque `pnpm` por `npx pnpm@12.21.0`.
@@ -87,6 +111,7 @@ Scripts disponíveis: `build`, `lint`, `lint:fix`, `typecheck`, `test`,
 
 - [Arquitetura](docs/architecture.md)
 - [Regras de CNPJ e fontes oficiais](docs/cnpj.md)
+- [Consulta de CEP: provedores, fallback e limites](docs/cep.md)
 - [Decisões técnicas (ADRs)](docs/adr/)
 - [Progresso](PROGRESS.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md)
 

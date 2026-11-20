@@ -20,8 +20,31 @@ clear data provenance.
 | ----------------------------------------------------------- | ------------------------- |
 | HTTP client with timeout, `AbortSignal` and typed errors    | ✅ implemented and tested |
 | Numeric and **alphanumeric** CNPJ validation (check digits) | ✅ implemented and tested |
-| CEP, IBGE municipalities/states, national holidays          | 🗓️ planned                |
+| CEP lookup (ViaCEP and BrasilAPI, with fallback)            | ✅ implemented and tested |
+| IBGE municipalities/states, national holidays               | 🗓️ planned                |
 | Retries with backoff and in-memory cache                    | 🗓️ planned                |
+
+## CEP lookup
+
+CEP is the Brazilian postal code. Lookups use ViaCEP and fall back to BrasilAPI
+when it is unavailable. The result is normalized (field names are in Portuguese)
+and says which provider answered. Details (in Portuguese): [docs/cep.md](docs/cep.md).
+
+```ts
+import { createCepClient, NotFoundError } from 'brasil-dev-kit';
+
+const cep = createCepClient({ timeoutMs: 8000 });
+
+const endereco = await cep.lookup('01310-100');
+// { cep: '01310100', uf: 'SP', municipio: 'São Paulo', bairro: 'Bela Vista',
+//   logradouro: 'Avenida Paulista', complemento: 'de 612 a 1510 - lado par',
+//   codigoIbgeMunicipio: '3550308', fonte: { provedor: 'viacep', servicoOrigem: null } }
+
+await cep.lookup('00000-000'); // throws NotFoundError
+```
+
+> Lookups hit free third-party services with no availability guarantee. ViaCEP
+> may block heavy users: do not use this to validate whole CEP databases.
 
 ## CNPJ validation
 
@@ -45,7 +68,7 @@ formatCnpj('11222333000181'); // '11.222.333/0001-81'
 
 ## HTTP client
 
-The foundation for the upcoming data adapters. Uses native `fetch`, no dependencies.
+The foundation of the data adapters (used by the CEP module). Uses native `fetch`, no dependencies.
 
 ```ts
 import { createHttpClient, TimeoutError } from 'brasil-dev-kit';
@@ -70,6 +93,7 @@ pnpm install
 pnpm test
 pnpm build
 node examples/node/cnpj.mjs
+node examples/node/cep.mjs 01310-100
 ```
 
 Without a global pnpm, replace `pnpm` with `npx pnpm@12.21.0`.
