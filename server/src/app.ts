@@ -84,6 +84,9 @@ export function createApp(deps: AppDeps): App {
     fetch: gatedFetch,
     timeoutMs: config.upstreamTimeoutMs,
     userAgent: `brasil-dev-kit-api/${API_VERSION} (+${DOCS_URL})`,
+    // Sem novas tentativas aqui: fila, ritmo por provedor, fallback e cache já cobrem
+    // falhas passageiras, e as contas de capacidade (docs/api.md) assumem uma tentativa.
+    retry: false as const,
   };
   const cep: CepClient = createCepClient(clientOptions);
   const ibge: IbgeClient = createIbgeClient(clientOptions);

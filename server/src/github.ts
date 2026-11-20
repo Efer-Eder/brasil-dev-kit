@@ -155,6 +155,8 @@ export function createGithubCache(options: GithubCacheOptions) {
     timeoutMs: options.timeoutMs,
     userAgent: options.userAgent,
     headers: { accept: 'application/vnd.github+json', 'x-github-api-version': '2022-11-28' },
+    // O fallback para o último dado bom já cobre falhas; repetir gastaria a cota sem token.
+    retry: false,
   });
   let last: { value: ResumoGithub; at: number } | undefined;
   let inFlight: Promise<ResumoGithub> | undefined;
