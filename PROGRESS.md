@@ -32,6 +32,17 @@
 - `pnpm run build` — `dist/` com ESM, CJS e tipos; import via ESM e `require`
   conferidos; `node examples/node/cnpj.mjs` roda.
 
+### Repositório e CI
+
+- Repositório público: <https://github.com/Efer-Eder/brasil-dev-kit>.
+- CI verde nas 4 combinações (Windows/Ubuntu × Node 22/24); gitleaks sem
+  vazamentos no histórico completo (execução manual, 14 commits).
+- A primeira execução do gitleaks no push inicial falhou por limitação da action
+  com o commit raiz (`<raiz>^` não existe); as seguintes passaram.
+- Dependabot ativo; majors de `typescript` e `@types/node` ignorados de propósito.
+  PRs abertos pelo Dependabot (`actions/checkout` e `actions/setup-node` v7)
+  passaram no CI e aguardam revisão.
+
 ### Decisões
 
 - Biome em vez de ESLint + Prettier (ADR 0001).
