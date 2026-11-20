@@ -1,0 +1,75 @@
+{
+  "_source": "Casos sintéticos. O exemplo 12.ABC.345/01DE-35 vem do manual oficial 'Cálculo dos dígitos verificadores de CNPJ alfanumérico' (Serpro/Receita Federal). Os demais foram calculados pelo algoritmo do manual; 11.222.333/0001-81 é um exemplo numérico de uso comum em documentação. Nenhum caso pretende representar empresa real.",
+  "valid": [
+    {
+      "input": "12.ABC.345/01DE-35",
+      "normalized": "12ABC34501DE35",
+      "kind": "alphanumeric",
+      "note": "exemplo oficial do manual"
+    },
+    {
+      "input": "12abc34501de35",
+      "normalized": "12ABC34501DE35",
+      "kind": "alphanumeric",
+      "note": "minúsculas são normalizadas"
+    },
+    {
+      "input": "11.222.333/0001-81",
+      "normalized": "11222333000181",
+      "kind": "numeric",
+      "note": "numérico formatado"
+    },
+    {
+      "input": "11222333000181",
+      "normalized": "11222333000181",
+      "kind": "numeric",
+      "note": "numérico sem pontuação"
+    },
+    {
+      "input": " 11 222 333 0001 81 ",
+      "normalized": "11222333000181",
+      "kind": "numeric",
+      "note": "espaços são removidos"
+    },
+    {
+      "input": "ZZ.ZZZ.ZZZ/ZZZZ-62",
+      "normalized": "ZZZZZZZZZZZZ62",
+      "kind": "alphanumeric",
+      "note": "maior valor (Z=42) em todas as posições"
+    },
+    {
+      "input": "A1.B2C.3D4/E5F6-68",
+      "normalized": "A1B2C3D4E5F668",
+      "kind": "alphanumeric",
+      "note": "letras e dígitos alternados"
+    },
+    {
+      "input": "AB.12C.D34/0001-84",
+      "normalized": "AB12CD34000184",
+      "kind": "alphanumeric",
+      "note": "matriz (0001) com raiz alfanumérica"
+    },
+    {
+      "input": "00.000.000/000A-04",
+      "normalized": "00000000000A04",
+      "kind": "alphanumeric",
+      "note": "uma única letra"
+    }
+  ],
+  "invalid": [
+    { "input": "", "reason": "empty" },
+    { "input": "   ", "reason": "empty" },
+    { "input": "1122233300018", "reason": "invalid_length" },
+    { "input": "112223330001811", "reason": "invalid_length" },
+    { "input": "12.ABC.345/01DE-3", "reason": "invalid_length" },
+    { "input": "12ABC34501DE3A", "reason": "invalid_characters" },
+    { "input": "12ABC*4501DE35", "reason": "invalid_characters" },
+    { "input": "12ABC34501DÉ35", "reason": "invalid_characters" },
+    { "input": "00000000000000", "reason": "repeated_characters" },
+    { "input": "11.111.111/1111-11", "reason": "repeated_characters" },
+    { "input": "12ABC34501DE36", "reason": "invalid_check_digits" },
+    { "input": "12ABC34501DE53", "reason": "invalid_check_digits" },
+    { "input": "11222333000182", "reason": "invalid_check_digits" },
+    { "input": "ZZZZZZZZZZZZ26", "reason": "invalid_check_digits" }
+  ]
+}

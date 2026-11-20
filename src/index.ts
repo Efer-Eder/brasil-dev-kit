@@ -19,3 +19,12 @@ export {
   type QueryValue,
   type RequestOptions,
 } from './core/http.js';
+export {
+  type CnpjInvalidReason,
+  type CnpjValidationResult,
+  computeCnpjCheckDigits,
+  formatCnpj,
+  isValidCnpj,
+  normalizeCnpj,
+  validateCnpj,
+} from './modules/cnpj/index.js';
