@@ -41,5 +41,21 @@
         "organizeImports": "on"
       }
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": ["site/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useTemplate": "off",
+            "noDescendingSpecificity": "off"
+          },
+          "complexity": {
+            "noImportantStyles": "off"
+          }
+        }
+      }
+    }
+  ]
 }

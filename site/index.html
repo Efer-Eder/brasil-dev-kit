@@ -1,0 +1,687 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brasil Dev Kit · efer.online</title>
+<meta name="description" content="Brasil Dev Kit: SDK TypeScript e API pública para CEP, UFs e municípios do IBGE, feriados nacionais e validação de CNPJ. Open source, MIT.">
+<meta name="theme-color" content="#0B0C0E">
+<meta name="color-scheme" content="dark">
+<link rel="canonical" href="https://efer.online/projeto/brasil-dev-kit/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='1' y='1' width='30' height='30' rx='8' fill='%2316171B' stroke='%23343640'/%3E%3Cpath d='M10.5 16.5h10a5 5 0 1 0-1.6 3.7' fill='none' stroke='%23EDEEF0' stroke-width='2.4' stroke-linecap='round'/%3E%3Ccircle cx='24' cy='24' r='2.4' fill='%237377F0'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#0B0C0E;--surface-1:#111215;--surface-2:#16171B;--surface-3:#1C1D22;
+  --surface-hover:rgba(255,255,255,.035);
+  --border:rgba(255,255,255,.08);--border-subtle:rgba(255,255,255,.05);--border-strong:rgba(255,255,255,.14);
+  --text-1:#EDEEF0;--text-2:#A0A3AB;--text-3:#6C707A;--text-on-accent:#fff;
+  --accent:#7377F0;--accent-hover:#8487F3;--accent-press:#6266E0;--accent-subtle:rgba(115,119,240,.14);--accent-text:#A9ABF7;
+  --focus-ring:0 0 0 2px var(--bg),0 0 0 4px rgba(115,119,240,.65);
+  --success:#4CB782;--success-subtle:rgba(76,183,130,.14);--warning:#D9A54A;--warning-subtle:rgba(217,165,74,.14);
+  --danger:#E0646A;--danger-subtle:rgba(224,100,106,.14);--info:#5E9EDB;
+  --font:"Geist",Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Geist Mono",ui-monospace,"SF Mono",Consolas,monospace;
+  --r-xs:2px;--r-sm:4px;--r-md:8px;--r-lg:12px;
+  --dur-fast:120ms;--dur-base:200ms;--ease-out:cubic-bezier(.16,1,.3,1);
+  --content-max:1120px;--gutter:24px;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--text-1);font-family:var(--font);font-size:14px;line-height:22px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+h1,h2,h3,p{margin:0}
+ul,ol{margin:0;padding:0;list-style:none}
+code{font:400 12.5px var(--mono);color:var(--text-1);background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:1px 5px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+fieldset{margin:0;padding:0;border:0;min-width:0}
+figure{margin:0}
+.wrap{max-width:calc(var(--content-max) + var(--gutter)*2);margin:0 auto;padding:0 var(--gutter)}
+:focus-visible{outline:none;box-shadow:var(--focus-ring);border-radius:var(--r-md)}
+.skip{position:absolute;left:16px;top:-48px;z-index:20;background:var(--surface-3);border:1px solid var(--border-strong);padding:8px 12px;border-radius:var(--r-md);font-size:13px}
+.skip:focus{top:12px}
+[data-lucide]{display:inline-block;width:16px;height:16px;flex:none}
+svg.lucide{width:16px;height:16px;flex:none}
+.backdrop{position:absolute;inset:0 0 auto 0;height:640px;pointer-events:none;z-index:-1;
+  background-image:linear-gradient(var(--border-subtle) 1px,transparent 1px),linear-gradient(90deg,var(--border-subtle) 1px,transparent 1px);
+  background-size:48px 48px;background-position:center top;
+  -webkit-mask-image:radial-gradient(ellipse 70% 60% at 30% 0%,#000 20%,transparent 75%);mask-image:radial-gradient(ellipse 70% 60% at 30% 0%,#000 20%,transparent 75%)}
+
+/* nav */
+.nav{position:sticky;top:0;z-index:10;height:56px;background:rgba(11,12,14,.8);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+.nav .wrap{height:100%;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:inline-flex;align-items:center;gap:10px;font-weight:600;font-size:14px;letter-spacing:-.01em;padding:4px;margin-left:-4px}
+.mark{position:relative;width:24px;height:24px;border-radius:7px;background:var(--surface-2);border:1px solid var(--border-strong);display:grid;place-items:center;font-size:14px;line-height:1;font-weight:600;padding-bottom:2px}
+.mark::after{content:"";position:absolute;right:3px;bottom:3px;width:4px;height:4px;border-radius:1px;background:var(--accent)}
+.brand .dim{color:var(--text-3);font-weight:500}
+.crumb{color:var(--text-3);font-weight:500}
+.nav-links{display:flex;align-items:center;gap:4px}
+.nav-links a{font-size:13px;font-weight:500;color:var(--text-2);padding:6px 10px;border-radius:var(--r-md);transition:color var(--dur-fast),background var(--dur-fast)}
+.nav-links a:hover{color:var(--text-1);background:var(--surface-hover)}
+.nav-links .icon-btn{width:32px;height:32px;padding:0;display:grid;place-items:center;border:1px solid var(--border);margin-left:8px}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:40px;align-items:center;padding:88px 0 40px}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;line-height:16px;letter-spacing:.02em;color:var(--text-2);padding:4px 10px 4px 8px;border:1px solid var(--border);border-radius:999px;background:var(--surface-1)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--success);box-shadow:0 0 0 3px var(--success-subtle);flex:none}
+.hero h1{margin-top:24px;font-size:52px;line-height:56px;letter-spacing:-.035em;font-weight:600}
+.hero h1 .soft{color:var(--text-3)}
+.lead{margin-top:20px;max-width:600px;font-size:17px;line-height:28px;letter-spacing:-.005em;color:var(--text-2)}
+.hero-actions{margin-top:32px;display:flex;flex-wrap:wrap;gap:8px}
+
+/* terminal no hero */
+.term{border:1px solid var(--border);border-radius:var(--r-lg);background:var(--surface-1);overflow:hidden}
+.term-bar{height:32px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:1px solid var(--border-subtle);font:400 11px var(--mono);color:var(--text-3)}
+.term-bar .lights{display:flex;gap:6px}
+.term-bar .lights i{width:8px;height:8px;border-radius:50%;background:var(--surface-3);display:block}
+.term pre{margin:0;padding:16px;font:400 12.5px/1.75 var(--mono);color:var(--text-2);overflow-x:auto;white-space:pre}
+.term .c{color:var(--text-3)}.term .k{color:var(--accent-text)}.term .s{color:#9FD3B7}.term .p{color:var(--text-1)}
+
+/* botões */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:36px;padding:0 14px;border-radius:var(--r-md);font-family:inherit;font-size:13px;font-weight:500;line-height:1;border:1px solid transparent;cursor:pointer;white-space:nowrap;transition:background var(--dur-fast),border-color var(--dur-fast),color var(--dur-fast)}
+.btn:active{transform:translateY(1px)}
+.btn:disabled{opacity:.4;cursor:default;transform:none}
+.btn-primary{background:var(--accent);color:var(--text-on-accent)}
+.btn-primary:hover{background:var(--accent-hover)}
+.btn-primary:active{background:var(--accent-press)}
+.btn-secondary{background:var(--surface-2);color:var(--text-1);border-color:var(--border-strong)}
+.btn-secondary:hover{background:#1D1E23}
+.btn-ghost{background:transparent;color:var(--text-2)}
+.btn-ghost:hover{background:var(--surface-hover);color:var(--text-1)}
+
+/* seções */
+section{scroll-margin-top:72px}
+.sec{padding-top:96px}
+.sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:24px}
+.sec-head .label{font-family:var(--mono);font-size:12px;line-height:16px;color:var(--text-3);letter-spacing:.02em;margin-bottom:8px;display:block}
+.sec-head h2{font-size:24px;line-height:32px;letter-spacing:-.02em;font-weight:600}
+.sec-head p{color:var(--text-2);font-size:14px;max-width:380px;text-align:right}
+.panel{border:1px solid var(--border);border-radius:var(--r-lg);background:var(--surface-1)}
+
+/* playground */
+.play{display:grid;grid-template-columns:320px minmax(0,1fr);overflow:hidden}
+.play-form{padding:20px;border-right:1px solid var(--border-subtle);display:flex;flex-direction:column;gap:16px}
+.tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.tab{height:32px;border-radius:var(--r-md);border:1px solid var(--border);background:var(--surface-2);color:var(--text-2);font:500 12px var(--mono);cursor:pointer;transition:color var(--dur-fast),border-color var(--dur-fast),background var(--dur-fast)}
+.tab:hover{color:var(--text-1)}
+.tab[aria-pressed="true"]{color:var(--accent-text);background:var(--accent-subtle);border-color:rgba(115,119,240,.4)}
+.field label{display:block;font-size:12px;line-height:16px;color:var(--text-3);margin-bottom:6px}
+.field input{width:100%;height:36px;border-radius:var(--r-md);border:1px solid var(--border-strong);background:var(--bg);color:var(--text-1);font:400 14px var(--mono);padding:0 12px}
+.field input:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.field .hint{margin-top:6px;font-size:12px;line-height:16px;color:var(--text-3)}
+.route{font:400 12px var(--mono);color:var(--text-3);word-break:break-all}
+.play-out{display:flex;flex-direction:column;min-width:0}
+.out-bar{min-height:40px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:8px 16px;border-bottom:1px solid var(--border-subtle);font:400 12px var(--mono);color:var(--text-3)}
+.status{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:var(--r-sm);font:500 12px var(--mono);background:var(--surface-2);border:1px solid var(--border);color:var(--text-2)}
+.status.ok{background:var(--success-subtle);border-color:rgba(76,183,130,.24);color:var(--success)}
+.status.warn{background:var(--warning-subtle);border-color:rgba(217,165,74,.24);color:var(--warning)}
+.status.err{background:var(--danger-subtle);border-color:rgba(224,100,106,.24);color:var(--danger)}
+.out{margin:0;padding:16px;height:360px;overflow:auto;font:400 12.5px/1.7 var(--mono);color:var(--text-1);white-space:pre-wrap;word-break:break-word}
+.out .muted{color:var(--text-3)}
+
+/* tabela de rotas */
+.routes{width:100%;border-collapse:collapse;font-size:13px}
+.routes th{text-align:left;font:500 12px var(--mono);color:var(--text-3);padding:12px 16px;border-bottom:1px solid var(--border)}
+.routes td{padding:12px 16px;border-bottom:1px solid var(--border-subtle);color:var(--text-2);vertical-align:top}
+.routes tr:last-child td{border-bottom:0}
+.routes td:first-child{font:500 12px var(--mono);color:var(--accent-text);white-space:nowrap}
+.routes td:nth-child(2){font:400 12.5px var(--mono);color:var(--text-1);white-space:nowrap}
+.table-scroll{overflow-x:auto}
+
+/* cards de fonte e números */
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.card{border:1px solid var(--border);border-radius:var(--r-lg);background:var(--surface-1);padding:20px;display:flex;flex-direction:column;gap:10px}
+.card .n{font:500 12px var(--mono);color:var(--accent-text)}
+.card h3{font-size:15px;line-height:22px;font-weight:600;letter-spacing:-.01em}
+.card p{color:var(--text-2);font-size:13px;line-height:21px}
+.card .src{margin-top:auto;padding-top:8px;border-top:1px solid var(--border-subtle);font:400 12px var(--mono);color:var(--text-3)}
+.card .src a{color:var(--text-2)}
+.card .src a:hover{color:var(--text-1);text-decoration:underline}
+.fact b{display:block;font-size:24px;line-height:32px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.fact span{display:block;margin-top:4px;color:var(--text-2);font-size:13px;line-height:20px}
+
+/* sdk */
+.snip{position:relative;border:1px solid var(--border);border-radius:var(--r-md);background:var(--bg);overflow:hidden}
+.snip pre{margin:0;padding:14px 92px 14px 16px;overflow-x:auto;font:400 13px/1.7 var(--mono);color:var(--text-1);tab-size:2}
+.snip .copy{position:absolute;top:8px;right:8px;height:28px;padding:0 10px;font:500 12px var(--font);color:var(--text-2);background:var(--surface-2);border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:color var(--dur-fast),border-color var(--dur-fast)}
+.snip .copy:hover{color:var(--text-1);border-color:var(--border-strong)}
+.snip .copy:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.steps{display:grid;gap:12px}
+.step{display:grid;grid-template-columns:40px minmax(0,1fr);gap:16px;padding:20px}
+.step .num{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;font:500 13px var(--mono);color:var(--accent-text);background:var(--accent-subtle);border:1px solid rgba(115,119,240,.25)}
+.step h3{font-size:16px;line-height:24px;font-weight:600;letter-spacing:-.01em}
+.step p{margin-top:6px;margin-bottom:14px;color:var(--text-2);max-width:680px}
+
+/* estado */
+.state{overflow:hidden}
+.state li{display:grid;grid-template-columns:120px minmax(0,1fr);gap:16px;align-items:center;min-height:52px;padding:12px 20px;border-bottom:1px solid var(--border-subtle)}
+.state li:last-child{border-bottom:0}
+.badge{display:inline-flex;align-items:center;gap:6px;height:20px;padding:0 8px;border-radius:var(--r-sm);font:500 12px var(--mono);line-height:1;background:var(--surface-2);border:1px solid var(--border);color:var(--text-2);white-space:nowrap;justify-self:start}
+.badge.ok{background:var(--success-subtle);border-color:rgba(76,183,130,.24);color:var(--success)}
+.state .txt{color:var(--text-1)}
+.state .txt span{color:var(--text-2)}
+
+/* github */
+.gh{overflow:hidden}
+.gh-stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));border-bottom:1px solid var(--border-subtle)}
+.gh-stat{padding:20px;border-right:1px solid var(--border-subtle)}
+.gh-stat:last-child{border-right:0}
+.gh-stat b{display:block;font-size:24px;line-height:32px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.gh-stat span{display:flex;align-items:center;gap:6px;margin-top:2px;font-size:12px;line-height:16px;color:var(--text-3)}
+.gh-stat span svg,.gh-stat span [data-lucide]{width:14px;height:14px}
+.gh-ci{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:12px 20px;border-bottom:1px solid var(--border-subtle);font:400 12px var(--mono);color:var(--text-3)}
+.gh-ci a{color:var(--text-2)}
+.gh-ci a:hover{color:var(--text-1);text-decoration:underline}
+.gh-cols{display:grid;grid-template-columns:minmax(0,1fr) 340px}
+.gh-col{padding:20px;min-width:0}
+.gh-col+.gh-col{border-left:1px solid var(--border-subtle)}
+.gh-col h3{font:500 12px var(--mono);color:var(--text-3);letter-spacing:.02em;margin-bottom:12px}
+.gh-commits li{display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;padding:10px 0;border-top:1px solid var(--border-subtle)}
+.gh-commits li:first-child{border-top:0;padding-top:0}
+.gh-commits .sha{font:500 12px var(--mono);color:var(--accent-text);padding-top:1px}
+.gh-commits .sha:hover{text-decoration:underline}
+.gh-commits .msg{display:block;color:var(--text-1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gh-commits .who{display:block;font-size:12px;line-height:18px;color:var(--text-3)}
+.gh-people{display:flex;flex-wrap:wrap;gap:8px}
+.gh-person{display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 10px 0 4px;border:1px solid var(--border);border-radius:999px;background:var(--surface-2);font-size:13px;color:var(--text-1);transition:border-color var(--dur-fast)}
+.gh-person:hover{border-color:var(--border-strong)}
+.gh-av{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--accent-subtle);color:var(--accent-text);font:600 11px var(--font);text-transform:uppercase}
+.gh-person small{font:400 12px var(--mono);color:var(--text-3)}
+.gh-cta{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.gh-foot{padding:12px 20px;border-top:1px solid var(--border-subtle);font:400 12px var(--mono);color:var(--text-3)}
+.gh-foot .warn{color:var(--warning)}
+.sk{display:inline-block;height:12px;width:48px;border-radius:var(--r-xs);background:var(--surface-2)}
+.gh-stat .sk{height:24px;width:40px;margin:4px 0}
+
+/* faq */
+.faq{overflow:hidden}
+.faq-i+.faq-i{border-top:1px solid var(--border-subtle)}
+.faq-i summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 20px;font-size:15px;font-weight:500;letter-spacing:-.01em;transition:background var(--dur-fast)}
+.faq-i summary::-webkit-details-marker{display:none}
+.faq-i summary:hover{background:var(--surface-hover)}
+.faq-i summary:focus-visible{outline:none;box-shadow:inset var(--focus-ring)}
+.faq-ic{position:relative;width:12px;height:12px;flex:none}
+.faq-ic::before,.faq-ic::after{content:"";position:absolute;left:0;top:5px;width:12px;height:1.5px;border-radius:1px;background:var(--text-3);transition:transform var(--dur-base) var(--ease-out)}
+.faq-ic::after{transform:rotate(90deg)}
+.faq-i[open] .faq-ic::after{transform:rotate(0)}
+.faq-i p{padding:0 20px 18px;color:var(--text-2);max-width:720px}
+
+/* footer */
+.footer{margin-top:96px;border-top:1px solid var(--border);background:var(--surface-1)}
+.footer .wrap{padding-top:24px;padding-bottom:24px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px;font-size:13px;color:var(--text-3)}
+.footer .left{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.footer .links{display:flex;gap:4px;flex-wrap:wrap}
+.footer .links a{padding:6px 10px;border-radius:var(--r-md);color:var(--text-2);transition:color var(--dur-fast),background var(--dur-fast)}
+.footer .links a:hover{color:var(--text-1);background:var(--surface-hover)}
+.footer .meta{width:100%;font-family:var(--mono);font-size:12px;border-top:1px solid var(--border-subtle);padding-top:16px}
+
+@media (max-width:1023px){
+  .gh-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .gh-stat:nth-child(3){border-right:0}
+  .gh-stat:nth-child(-n+3){border-bottom:1px solid var(--border-subtle)}
+  .gh-cols{grid-template-columns:1fr}
+  .gh-col+.gh-col{border-left:0;border-top:1px solid var(--border-subtle)}
+  .hero{grid-template-columns:1fr}
+  .play{grid-template-columns:1fr}
+  .play-form{border-right:0;border-bottom:1px solid var(--border-subtle)}
+  .grid4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid3{grid-template-columns:1fr}
+}
+@media (max-width:639px){
+  :root{--gutter:16px}
+  .nav-links a:not(.icon-btn){display:none}
+  .crumb{display:none}
+  .hero{padding:56px 0 24px}
+  .hero h1{font-size:36px;line-height:40px;letter-spacing:-.03em}
+  .lead{font-size:16px;line-height:26px}
+  .sec{padding-top:64px}
+  .sec-head{flex-direction:column;align-items:flex-start}
+  .sec-head p{text-align:left}
+  .grid4{grid-template-columns:1fr}
+  .step{grid-template-columns:1fr}
+  .snip pre{padding-right:16px;padding-top:44px}
+  .state li{grid-template-columns:1fr;gap:6px}
+  .gh-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .gh-stat{border-right:1px solid var(--border-subtle)!important;border-bottom:1px solid var(--border-subtle)}
+  .gh-stat:nth-child(2n){border-right:0!important}
+  .gh-stat:nth-last-child(-n+2){border-bottom:0}
+  .gh-commits li{grid-template-columns:56px minmax(0,1fr)}
+  .out{height:300px}
+  .footer{margin-top:64px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition-duration:0ms!important;animation:none!important}
+}
+</style>
+</head>
+<body>
+<script src="/ponto.js?v=2" data-companion></script>
+<a class="skip" href="#conteudo">Pular para o conteúdo</a>
+<div class="backdrop" aria-hidden="true"></div>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="/" aria-label="efer.online, início"><span class="mark" aria-hidden="true" data-ponto-origin>e</span><span>efer<span class="dim">.online</span></span><span class="crumb">/ brasil-dev-kit</span></a>
+    <nav class="nav-links" aria-label="Principal">
+      <a href="#api">API</a>
+      <a href="#sdk">SDK</a>
+      <a href="#fontes">Fontes</a>
+      <a href="#limites">Limites</a>
+      <a href="#github">GitHub</a>
+      <a href="#faq">Perguntas</a>
+      <a class="icon-btn" href="https://github.com/Efer-Eder/brasil-dev-kit" target="_blank" rel="noopener"><i data-lucide="github" aria-hidden="true"></i><span class="sr">Repositório no GitHub</span></a>
+    </nav>
+  </div>
+</header>
+
+<main id="conteudo">
+  <div class="wrap">
+
+    <section class="hero" aria-labelledby="hero-t">
+      <div>
+        <span class="eyebrow"><span class="dot" aria-hidden="true"></span>open source · MIT · em desenvolvimento</span>
+        <h1 id="hero-t">Brasil Dev Kit.<span class="soft"> CEP, IBGE, feriados e CNPJ com tipos e erros previsíveis.</span></h1>
+        <p class="lead">Um SDK TypeScript e uma API HTTP pública para os dados brasileiros que todo sistema acaba precisando. Cada resposta diz de onde veio o dado, todo erro tem um código estável e nada depende de chave paga.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#api"><i data-lucide="play"></i>Testar a API</a>
+          <a class="btn btn-secondary" href="https://github.com/Efer-Eder/brasil-dev-kit" target="_blank" rel="noopener"><i data-lucide="github"></i>Código no GitHub</a>
+          <a class="btn btn-ghost" href="/">Voltar ao efer.online</a>
+        </div>
+      </div>
+      <figure class="term">
+        <figcaption class="term-bar"><span class="lights" aria-hidden="true"><i></i><i></i><i></i></span><span><span class="sr">Exemplo de chamada: </span>GET /v1/cep/01310-100</span></figcaption>
+<pre><span class="c">$</span> <span class="p">API=efer.online/api/brasil-dev-kit</span>
+<span class="c">$</span> <span class="p">curl $API/v1/cep/01310-100</span>
+{
+  <span class="k">"cep"</span>: <span class="s">"01310100"</span>,
+  <span class="k">"uf"</span>: <span class="s">"SP"</span>,
+  <span class="k">"municipio"</span>: <span class="s">"São Paulo"</span>,
+  <span class="k">"bairro"</span>: <span class="s">"Bela Vista"</span>,
+  <span class="k">"logradouro"</span>: <span class="s">"Avenida Paulista"</span>,
+  <span class="k">"codigoIbgeMunicipio"</span>: <span class="s">"3550308"</span>,
+  <span class="k">"fonte"</span>: { <span class="k">"provedor"</span>: <span class="s">"viacep"</span> }
+}</pre>
+      </figure>
+    </section>
+
+    <section id="api" class="sec" aria-labelledby="api-t" data-ponto-title="Playground" data-ponto="Isso aqui chama a API de verdade, do seu navegador. Escolhe uma rota, troca o valor e manda. Repara no X-Cache: a segunda consulta do mesmo CEP já vem da memória." data-ponto-mood="terminal" data-ponto-hint="testar a API">
+      <div class="sec-head">
+        <div><span class="label">/api</span><h2 id="api-t">Teste agora, direto do navegador</h2></div>
+        <p>As chamadas abaixo vão para a API real. Sem cadastro, sem chave.</p>
+      </div>
+      <div class="panel play">
+        <form class="play-form" id="play" novalidate>
+          <fieldset class="tabs"><legend class="sr">Rota</legend>
+            <button type="button" class="tab" data-ep="cep" aria-pressed="true">cep</button>
+            <button type="button" class="tab" data-ep="municipios" aria-pressed="false">municípios</button>
+            <button type="button" class="tab" data-ep="feriados" aria-pressed="false">feriados</button>
+            <button type="button" class="tab" data-ep="cnpj" aria-pressed="false">cnpj</button>
+          </fieldset>
+          <div class="field">
+            <label for="play-v" id="play-l">CEP</label>
+            <input id="play-v" name="v" autocomplete="off" spellcheck="false" value="01310-100">
+            <p class="hint" id="play-h">8 dígitos, com ou sem hífen.</p>
+          </div>
+          <p class="route" id="play-r" aria-live="polite">GET /api/brasil-dev-kit/v1/cep/01310-100</p>
+          <button type="submit" class="btn btn-primary" id="play-go"><i data-lucide="send"></i>Enviar</button>
+        </form>
+        <div class="play-out">
+          <div class="out-bar" aria-live="polite"><span class="status" id="out-s">aguardando</span><span id="out-m"></span></div>
+          <h3 class="sr" id="out-t">Resposta da API</h3><pre class="out" id="out"><span class="muted">A resposta aparece aqui.</span></pre>
+        </div>
+      </div>
+
+      <div class="panel table-scroll" style="margin-top:12px">
+        <table class="routes">
+          <thead><tr><th scope="col">Método</th><th scope="col">Rota</th><th scope="col">O que devolve</th></tr></thead>
+          <tbody>
+            <tr><td>GET</td><td>/v1/cep/{cep}</td><td>Endereço normalizado, com o provedor que respondeu em <code>fonte</code>.</td></tr>
+            <tr><td>GET</td><td>/v1/ibge/ufs</td><td>As 27 UFs com região, ordenadas por nome.</td></tr>
+            <tr><td>GET</td><td>/v1/ibge/ufs/{uf}/municipios</td><td>Municípios da UF (sigla ou código IBGE), com divisões regionais.</td></tr>
+            <tr><td>GET</td><td>/v1/feriados/{ano}</td><td>Feriados nacionais e pontos facultativos federais, com a lei ou portaria de cada data.</td></tr>
+            <tr><td>GET</td><td>/v1/cnpj/{cnpj}</td><td>Validação de formato e dígitos verificadores, numérico ou alfanumérico.</td></tr>
+            <tr><td>GET</td><td>/v1/health</td><td>Saúde da API.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="sdk" class="sec" aria-labelledby="sdk-t" data-ponto-title="SDK" data-ponto="Se preferir rodar dentro do seu sistema, a biblioteca faz o mesmo que a API, sem passar por aqui. Ainda não está no npm, então por enquanto é a partir do código." data-ponto-mood="feliz" data-ponto-hint="usar no código">
+      <div class="sec-head">
+        <div><span class="label">/sdk</span><h2 id="sdk-t">No seu código</h2></div>
+        <p>TypeScript strict, ESM e CommonJS, zero dependência em runtime. Node 22 ou mais novo.</p>
+      </div>
+      <ol class="steps">
+        <li class="panel step"><span class="num">1</span><div><h3>Clone e gere o build</h3><p>O pacote ainda não está publicado no npm. Até lá, use a partir do código.</p><div class="snip"><pre><code>git clone https://github.com/Efer-Eder/brasil-dev-kit.git
+cd brasil-dev-kit
+pnpm install
+pnpm build</code></pre><button type="button" class="copy" data-copy>Copiar</button></div></div></li>
+        <li class="panel step"><span class="num">2</span><div><h3>Consulte e trate os erros pelo tipo</h3><p>Cada falha vira uma classe com <code>code</code> estável: <code>ValidationError</code>, <code>NotFoundError</code>, <code>RateLimitError</code>, <code>TimeoutError</code>, <code>ProviderUnavailableError</code>.</p><div class="snip"><pre><code>import { createCepClient, NotFoundError } from 'brasil-dev-kit';
+
+const cep = createCepClient({ timeoutMs: 8000 });
+
+try {
+  const endereco = await cep.lookup('01310-100');
+  console.log(endereco.municipio, endereco.fonte.provedor);
+} catch (error) {
+  if (error instanceof NotFoundError) console.log('CEP não existe');
+  else throw error;
+}</code></pre><button type="button" class="copy" data-copy>Copiar</button></div></div></li>
+        <li class="panel step"><span class="num">3</span><div><h3>Funções que não precisam de rede</h3><p>Feriados e CNPJ rodam localmente, sem requisição nenhuma.</p><div class="snip"><pre><code>import { isFeriadoNacional, getFeriadosNacionais, validateCnpj } from 'brasil-dev-kit';
+
+isFeriadoNacional('2026-11-20');    // true
+getFeriadosNacionais(2026).origem;  // 'portaria'
+validateCnpj('12.ABC.345/01DE-35'); // { valid: true, kind: 'alphanumeric', ... }</code></pre><button type="button" class="copy" data-copy>Copiar</button></div></div></li>
+      </ol>
+    </section>
+
+    <section id="fontes" class="sec" aria-labelledby="fontes-t" data-ponto-title="Fontes" data-ponto="Todo dado tem origem. Nada aqui foi inventado: cada módulo cita a documentação ou a lei que usou, e os testes conferem as respostas reais gravadas." data-ponto-mood="cor" data-ponto-hint="de onde vem cada dado">
+      <div class="sec-head">
+        <div><span class="label">/fontes</span><h2 id="fontes-t">De onde vem cada dado</h2></div>
+        <p>A API é minha. Os dados vêm de fontes públicas, e cada resposta diz qual.</p>
+      </div>
+      <div class="grid4">
+        <article class="card"><span class="n">01</span><h3>CEP</h3><p>ViaCEP primeiro. Se ele estiver fora do ar, lento ou limitando, a consulta cai para a BrasilAPI. O campo <code>fonte</code> diz quem respondeu.</p><p class="src"><a href="https://viacep.com.br/" target="_blank" rel="noopener">viacep.com.br</a> · <a href="https://github.com/BrasilAPI/BrasilAPI" target="_blank" rel="noopener">BrasilAPI</a></p></article>
+        <article class="card"><span class="n">02</span><h3>UFs e municípios</h3><p>API de Localidades do IBGE, a fonte oficial. Códigos sempre como texto, para bater com o código do município no CEP.</p><p class="src"><a href="https://servicodados.ibge.gov.br/api/docs/localidades" target="_blank" rel="noopener">servicodados.ibge.gov.br</a></p></article>
+        <article class="card"><span class="n">03</span><h3>Feriados</h3><p>Leis federais para os feriados e a portaria anual do governo federal para os pontos facultativos. Ano sem portaria publicada vem só com o que está em lei, e avisa.</p><p class="src">Leis 662/1949, 6.802/1980, 14.759/2023 · Portarias MGI</p></article>
+        <article class="card"><span class="n">04</span><h3>CNPJ</h3><p>Cálculo local dos dígitos verificadores, inclusive do CNPJ alfanumérico, conforme o manual oficial. Valida formato, não consulta cadastro.</p><p class="src">IN RFB nº 2.229/2024 · manual de DV do Serpro</p></article>
+      </div>
+    </section>
+
+    <section id="limites" class="sec" aria-labelledby="lim-t" data-ponto-title="Limites" data-ponto="Esses números foram medidos, não chutados. O limite por IP existe para a API continuar de pé para todo mundo, e o cache protege os serviços públicos que ficam atrás de mim." data-ponto-mood="deploy" data-ponto-hint="os números">
+      <div class="sec-head">
+        <div><span class="label">/limites</span><h2 id="lim-t">Limites e números</h2></div>
+        <p>Gratuita e sem SLA. Para uso pesado, rode o SDK no seu servidor.</p>
+      </div>
+      <div class="grid3">
+        <div class="card fact"><b class="mono">10 req/s</b><span>por IP, com rajada de 30. Acima disso: <code>429</code> com <code>Retry-After</code>.</span></div>
+        <div class="card fact"><b class="mono">7 dias</b><span>de cache para cada CEP encontrado. CEP inexistente fica 6 horas; UFs e municípios, 24 horas.</span></div>
+        <div class="card fact"><b class="mono">~880 req/s</b><span>medidos no servidor com cache quente, usando meia CPU. Mediana de 6 ms.</span></div>
+        <div class="card fact"><b class="mono">4 s</b><span>de timeout por provedor. Com fallback, uma consulta de CEP leva no máximo cerca de 8 s.</span></div>
+        <div class="card fact"><b class="mono">4 req/s</b><span>no máximo para cada provedor externo, para não sobrecarregar serviços gratuitos.</span></div>
+        <div class="card fact"><b class="mono">0</b><span>IPs ou consultas guardados em log da aplicação. Só contadores agregados.</span></div>
+      </div>
+    </section>
+
+    <section id="github" class="sec" aria-labelledby="gh-t" data-ponto-title="GitHub" data-ponto="Esses números vêm do GitHub de verdade, com cache de 10 minutos. Se quiser ajudar, uma estrela, uma issue ou um pull request já fazem diferença." data-ponto-mood="levelup" data-ponto-hint="o projeto no GitHub">
+      <div class="sec-head">
+        <div><span class="label">/github</span><h2 id="gh-t">O projeto no GitHub</h2></div>
+        <p>Dados ao vivo do repositório, atualizados a cada 10 minutos.</p>
+      </div>
+      <div class="panel gh" id="gh" aria-busy="true">
+        <div class="gh-stats">
+          <div class="gh-stat"><b id="gh-stars"><span class="sk"></span></b><span><i data-lucide="star"></i>Estrelas</span></div>
+          <div class="gh-stat"><b id="gh-forks"><span class="sk"></span></b><span><i data-lucide="git-fork"></i>Forks</span></div>
+          <div class="gh-stat"><b id="gh-issues"><span class="sk"></span></b><span><i data-lucide="circle-dot"></i>Issues abertas</span></div>
+          <div class="gh-stat"><b id="gh-prs"><span class="sk"></span></b><span><i data-lucide="git-pull-request"></i>PRs abertos</span></div>
+          <div class="gh-stat"><b id="gh-commits-n"><span class="sk"></span></b><span><i data-lucide="git-commit-horizontal"></i>Commits</span></div>
+          <div class="gh-stat"><b id="gh-people-n"><span class="sk"></span></b><span><i data-lucide="users"></i>Contribuidores</span></div>
+        </div>
+        <div class="gh-ci" id="gh-ci"><span class="status" id="gh-ci-s">CI</span><span id="gh-ci-t">carregando o status do CI</span></div>
+        <div class="gh-cols">
+          <div class="gh-col">
+            <h3>últimos commits</h3>
+            <ul class="gh-commits" id="gh-commits"><li><span class="sk"></span><span><span class="sk" style="width:70%"></span></span></li></ul>
+          </div>
+          <div class="gh-col">
+            <h3>contribuidores</h3>
+            <div class="gh-people" id="gh-people"><span class="sk" style="width:120px;height:32px;border-radius:999px"></span></div>
+            <div class="gh-cta">
+              <a class="btn btn-secondary" href="https://github.com/Efer-Eder/brasil-dev-kit" target="_blank" rel="noopener"><i data-lucide="star"></i>Dar uma estrela</a>
+              <a class="btn btn-ghost" href="https://github.com/Efer-Eder/brasil-dev-kit/issues/new" target="_blank" rel="noopener"><i data-lucide="circle-dot"></i>Abrir issue</a>
+              <a class="btn btn-ghost" href="https://github.com/Efer-Eder/brasil-dev-kit/pulls" target="_blank" rel="noopener"><i data-lucide="git-pull-request"></i>Pull requests</a>
+            </div>
+          </div>
+        </div>
+        <p class="gh-foot" id="gh-foot">fonte: api.github.com</p>
+      </div>
+    </section>
+
+    <section id="estado" class="sec" aria-labelledby="estado-t">
+      <div class="sec-head">
+        <div><span class="label">/estado</span><h2 id="estado-t">O que já existe</h2></div>
+        <p>Histórico completo no <a href="https://github.com/Efer-Eder/brasil-dev-kit/blob/main/CHANGELOG.md" target="_blank" rel="noopener" style="color:var(--text-1)">CHANGELOG</a>.</p>
+      </div>
+      <ul class="panel state">
+        <li><span class="badge ok">pronto</span><span class="txt">CEP, UFs, municípios, feriados e CNPJ <span>na biblioteca e na API</span></span></li>
+        <li><span class="badge ok">pronto</span><span class="txt">Cliente HTTP com timeout e cancelamento <span>e erros tipados</span></span></li>
+        <li><span class="badge ok">pronto</span><span class="txt">CI no Windows e no Linux <span>com testes contra respostas reais gravadas</span></span></li>
+        <li><span class="badge">próximo</span><span class="txt">Retries com backoff e cache <span>dentro da biblioteca</span></span></li>
+        <li><span class="badge">próximo</span><span class="txt">Publicação no npm <span>e uma fachada única para todos os módulos</span></span></li>
+      </ul>
+    </section>
+
+    <section id="faq" class="sec" aria-labelledby="faq-t">
+      <div class="sec-head">
+        <div><span class="label">/perguntas</span><h2 id="faq-t">Perguntas frequentes</h2></div>
+        <p>Clica numa pergunta que o Ponto responde.</p>
+      </div>
+      <div class="panel faq">
+        <details class="faq-i" data-ponto-faq><summary>Posso usar a API em produção?<span class="faq-ic" aria-hidden="true"></span></summary><p>Pode, sabendo que é gratuita e sem garantia de disponibilidade. Para tráfego alto ou algo crítico, rode o SDK no seu próprio servidor: o código é o mesmo.</p></details>
+        <details class="faq-i" data-ponto-faq><summary>Por que a primeira consulta de um CEP demora mais?<span class="faq-ic" aria-hidden="true"></span></summary><p>Porque ela vai até o provedor público. A partir daí o CEP fica em cache por 7 dias e responde em poucos milissegundos. O cabeçalho X-Cache mostra se foi HIT ou MISS.</p></details>
+        <details class="faq-i" data-ponto-faq><summary>A validação de CNPJ diz se a empresa existe?<span class="faq-ic" aria-hidden="true"></span></summary><p>Não. Ela confere formato e dígitos verificadores, inclusive do CNPJ alfanumérico. Existência e situação cadastral só a Receita Federal informa.</p></details>
+        <details class="faq-i" data-ponto-faq><summary>Os feriados incluem os estaduais e municipais?<span class="faq-ic" aria-hidden="true"></span></summary><p>Ainda não. Hoje são os feriados nacionais e os pontos facultativos do governo federal, cada um com a lei ou portaria de origem.</p></details>
+        <details class="faq-i" data-ponto-faq><summary>Vocês guardam o que eu consulto?<span class="faq-ic" aria-hidden="true"></span></summary><p>A aplicação não registra IP nem o que foi consultado, só contadores agregados. O cache guarda o dado público do CEP, não quem pediu.</p></details>
+        <details class="faq-i" data-ponto-faq><summary>Como contribuo?<span class="faq-ic" aria-hidden="true"></span></summary><p>Abre uma issue ou um pull request no GitHub. O CONTRIBUTING explica o padrão: testes junto com o código e nenhuma integração sem documentação oficial citada.</p></details>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="left">
+      <a class="brand" href="/" aria-label="efer.online, início"><span class="mark" aria-hidden="true">e</span><span>efer<span class="dim">.online</span></span></a>
+      <span>© <span id="ano">2026</span> Efer</span>
+    </div>
+    <nav class="links" aria-label="Rodapé">
+      <a href="/">Início</a>
+      <a href="/api/brasil-dev-kit/">API</a>
+      <a href="https://github.com/Efer-Eder/brasil-dev-kit" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/Efer-Eder/brasil-dev-kit/blob/main/docs/api.md" target="_blank" rel="noopener">Documentação</a>
+    </nav>
+    <div class="meta">Brasil Dev Kit · licença MIT · dados de fontes públicas, citadas em cada resposta.</div>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+<script>
+(() => {
+  if (window.lucide) lucide.createIcons({ attrs: { 'stroke-width': 1.5 } });
+  var ano = document.getElementById('ano');
+  if (ano) ano.textContent = String(new Date().getFullYear());
+
+  var BASE = '/api/brasil-dev-kit/v1/';
+  var EPS = {
+    cep: { label: 'CEP', hint: '8 dígitos, com ou sem hífen.', value: '01310-100', path: (v) => 'cep/' + encodeURIComponent(v) },
+    municipios: { label: 'UF', hint: 'Sigla (RR) ou código IBGE (14).', value: 'RR', path: (v) => 'ibge/ufs/' + encodeURIComponent(v) + '/municipios' },
+    feriados: { label: 'Ano', hint: 'De 2024 a 2099. 2025 e 2026 vêm da portaria federal.', value: '2026', path: (v) => 'feriados/' + encodeURIComponent(v) },
+    cnpj: { label: 'CNPJ', hint: 'Sem a barra: 12ABC34501DE35 ou 11222333000181.', value: '12ABC34501DE35', path: (v) => 'cnpj/' + encodeURIComponent(v.replace(/\//g, '')) }
+  };
+  var current = 'cep';
+  var form = document.getElementById('play');
+  var input = document.getElementById('play-v');
+  var label = document.getElementById('play-l');
+  var hint = document.getElementById('play-h');
+  var route = document.getElementById('play-r');
+  var go = document.getElementById('play-go');
+  var out = document.getElementById('out');
+  var outS = document.getElementById('out-s');
+  var outM = document.getElementById('out-m');
+  if (!form) return;
+
+  function url() { return BASE + EPS[current].path(input.value.trim()); }
+  function syncRoute() { route.textContent = 'GET ' + url(); }
+
+  Array.prototype.forEach.call(document.querySelectorAll('.tab'), (tab) => {
+    tab.addEventListener('click', () => {
+      current = tab.getAttribute('data-ep');
+      Array.prototype.forEach.call(document.querySelectorAll('.tab'), (t) => { t.setAttribute('aria-pressed', String(t === tab)); });
+      label.textContent = EPS[current].label;
+      hint.textContent = EPS[current].hint;
+      input.value = EPS[current].value;
+      syncRoute();
+      input.focus();
+    });
+  });
+  input.addEventListener('input', syncRoute);
+
+  function shorten(data) {
+    // Listas longas (municípios) mostram os primeiros itens para não travar a tela.
+    if (Array.isArray(data) && data.length > 6) {
+      return { total: data.length, primeiros: data.slice(0, 5), nota: 'lista cortada aqui; a API devolve todos os itens' };
+    }
+    return data;
+  }
+
+  form.addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    if (!input.value.trim()) { input.focus(); return; }
+    go.disabled = true;
+    outS.className = 'status';
+    outS.textContent = 'enviando';
+    outM.textContent = '';
+    var t0 = performance.now();
+    fetch(url(), { headers: { accept: 'application/json' } })
+      .then((res) => {
+        var ms = Math.round(performance.now() - t0);
+        var cache = res.headers.get('x-cache');
+        outS.textContent = String(res.status);
+        outS.className = 'status ' + (res.ok ? 'ok' : res.status === 429 || res.status >= 500 ? 'warn' : 'err');
+        outM.textContent = ms + ' ms' + (cache ? ' · X-Cache: ' + cache : '');
+        return res.text();
+      })
+      .then((text) => {
+        var shown;
+        try { shown = JSON.stringify(shorten(JSON.parse(text)), null, 2); } catch (_e) { shown = text; }
+        out.textContent = shown;
+      })
+      .catch(() => {
+        outS.className = 'status err';
+        outS.textContent = 'falhou';
+        out.textContent = 'Não consegui falar com a API. Confira a conexão e tente de novo.';
+      })
+      .then(() => { go.disabled = false; });
+  });
+
+  // Widget do GitHub: dados via API própria (cache de 10 min no servidor).
+  var REPO = 'https://github.com/Efer-Eder/brasil-dev-kit';
+  function rel(iso) {
+    var sec = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
+    if (sec < 60) return 'agora';
+    if (sec < 3600) return 'há ' + Math.floor(sec / 60) + ' min';
+    if (sec < 86400) return 'há ' + Math.floor(sec / 3600) + ' h';
+    var d = Math.floor(sec / 86400);
+    return 'há ' + d + (d === 1 ? ' dia' : ' dias');
+  }
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined) n.textContent = text;
+    return n;
+  }
+  function link(node, href) {
+    node.href = href;
+    node.target = '_blank';
+    node.rel = 'noopener';
+    return node;
+  }
+  function setNum(id, v) {
+    var n = document.getElementById(id);
+    if (n) n.textContent = String(v);
+  }
+  var gh = document.getElementById('gh');
+  if (gh) {
+    fetch('/api/brasil-dev-kit/v1/projeto/github', { headers: { accept: 'application/json' } })
+      .then((r) => {
+        if (!r.ok) throw new Error(String(r.status));
+        return r.json();
+      })
+      .then((d) => {
+        var repo = d.repositorio;
+        setNum('gh-stars', repo.estrelas);
+        setNum('gh-forks', repo.forks);
+        setNum('gh-issues', repo.issuesAbertas);
+        setNum('gh-prs', repo.prsAbertos);
+        setNum('gh-commits-n', d.totalCommits);
+        setNum('gh-people-n', d.contribuidores.length);
+
+        var ciS = document.getElementById('gh-ci-s');
+        var ciT = document.getElementById('gh-ci-t');
+        ciT.textContent = '';
+        var passed = !!d.ci && d.ci.conclusao === 'success';
+        var running = !!d.ci && d.ci.status !== 'completed';
+        if (d.ci) {
+          ciS.className = 'status ' + (running ? '' : passed ? 'ok' : 'err');
+          ciS.textContent = running ? 'CI rodando' : passed ? 'CI passou' : 'CI falhou';
+          ciT.appendChild(link(el('a', '', 'main · ' + d.ci.commit), d.ci.url));
+          ciT.appendChild(document.createTextNode(' · ' + rel(d.ci.em) + ' · Windows e Linux, Node 22 e 24'));
+        } else {
+          ciT.textContent = 'sem execução recente';
+        }
+
+        var list = document.getElementById('gh-commits');
+        list.textContent = '';
+        d.commits.forEach((c) => {
+          var li = el('li');
+          var body = el('span');
+          body.appendChild(el('span', 'msg', c.mensagem));
+          body.appendChild(el('span', 'who', c.autor + ' · ' + rel(c.data)));
+          li.appendChild(link(el('a', 'sha', c.sha), c.url));
+          li.appendChild(body);
+          list.appendChild(li);
+        });
+
+        var people = document.getElementById('gh-people');
+        people.textContent = '';
+        d.contribuidores.forEach((p) => {
+          var a = link(el('a', 'gh-person'), p.url);
+          a.appendChild(el('span', 'gh-av', p.login.slice(0, 1)));
+          a.appendChild(el('span', '', p.login));
+          a.appendChild(el('small', '', String(p.contribuicoes)));
+          people.appendChild(a);
+        });
+
+        var foot = document.getElementById('gh-foot');
+        foot.textContent =
+          'atualizado ' + rel(d.atualizadoEm) + ' · fonte: api.github.com · último push ' + rel(repo.ultimoPush);
+        if (d.desatualizado) foot.appendChild(el('span', 'warn', ' · GitHub indisponível agora, mostrando o último dado'));
+        gh.setAttribute('aria-busy', 'false');
+      })
+      .catch(() => {
+        gh.setAttribute('aria-busy', 'false');
+        ['gh-stars', 'gh-forks', 'gh-issues', 'gh-prs', 'gh-commits-n', 'gh-people-n'].forEach((id) => {
+          setNum(id, '·');
+        });
+        document.getElementById('gh-ci-t').textContent = 'não consegui carregar os dados agora';
+        document.getElementById('gh-commits').textContent = '';
+        document.getElementById('gh-people').textContent = '';
+        var foot = document.getElementById('gh-foot');
+        foot.textContent = 'Veja direto em ';
+        var a = link(el('a', '', 'github.com/Efer-Eder/brasil-dev-kit'), REPO);
+        a.style.color = 'var(--text-2)';
+        foot.appendChild(a);
+      });
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('[data-copy]'), (btn) => {
+    btn.addEventListener('click', () => {
+      var code = btn.parentNode.querySelector('code');
+      if (!code || !navigator.clipboard) return;
+      navigator.clipboard.writeText(code.textContent).then(() => {
+        btn.textContent = 'Copiado';
+        setTimeout(() => { btn.textContent = 'Copiar'; }, 1600);
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>
