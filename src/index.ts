@@ -41,3 +41,15 @@ export {
   normalizeCnpj,
   validateCnpj,
 } from './modules/cnpj/index.js';
+export {
+  createIbgeClient,
+  type DivisaoIbge,
+  type IbgeClient,
+  type IbgeClientOptions,
+  type IbgeRequestOptions,
+  type Municipio,
+  type Regiao,
+  resolveUf,
+  UF_CODES,
+  type Uf,
+} from './modules/ibge/index.js';
