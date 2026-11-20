@@ -5,7 +5,7 @@
 
 ```text
 src/
-  core/        # cliente HTTP, erros tipados (cache e retries: planejados)
+  core/        # cliente HTTP: timeout, retries com backoff, cache TTL e erros tipados
   providers/   # clientes por fonte de dados: viacep, brasilapi (CEP), ibge
   modules/     # API pública por domínio: cnpj, cep, ibge (prontos); feriados (planejado)
   index.ts     # ponto de entrada público
@@ -44,3 +44,28 @@ docs/
   `ProviderUnavailableError`; outros não-2xx → `HttpError`.
 - O corpo de respostas de erro é descartado e não entra na mensagem, para não
   vazar conteúdo inesperado em logs.
+
+### Novas tentativas (`retry`)
+
+- Padrão: `{ retries: 2, baseDelayMs: 200, maxDelayMs: 2000, maxRetryAfterMs: 5000 }`;
+  `retry: false` desliga. O `timeoutMs` vale para cada tentativa.
+- Repete só o que costuma ser passageiro: falha de rede, 5xx, timeout e 429.
+  Nunca repete 404, outros 4xx, JSON inválido ou cancelamento do chamador.
+- Espera: backoff exponencial com "full jitter" (valor aleatório entre 0 e
+  `min(maxDelayMs, baseDelayMs × 2^n)`), para clientes não voltarem todos juntos.
+- 429 com `Retry-After`: espera exatamente o pedido, se for até
+  `maxRetryAfterMs`; acima disso lança `RateLimitError` na hora.
+- O `AbortSignal` do chamador também interrompe a espera entre tentativas.
+- Clientes: o IBGE usa o padrão; o CEP com mais de um provedor usa `retry: false`
+  por padrão (o fallback para o próximo provedor já é a nova tentativa). A API
+  pública desliga as novas tentativas: fila, ritmo, fallback e cache já cobrem.
+
+### Cache (`cache` / `cacheTtlMs`)
+
+- Desligado por padrão. `createHttpClient({ cache: { ttlMs, maxEntries } })`, ou
+  `cacheTtlMs`/`cacheMaxEntries` nos clientes de CEP e IBGE.
+- Guarda só respostas de sucesso (o JSON já interpretado), por URL completa,
+  com TTL e limite de entradas (sai a menos usada; padrão 500).
+- Devolve cópias (`structuredClone`): alterar o resultado não altera o cache.
+- Pedidos simultâneos da mesma URL compartilham uma única ida à rede; cancelar
+  um deles não cancela os outros.

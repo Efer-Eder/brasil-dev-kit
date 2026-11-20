@@ -7,8 +7,8 @@ verificação das fontes oficiais.
 
 - [x] Core HTTP: timeout, `AbortSignal`, erros tipados
 - [x] CNPJ: validação estrutural e dígitos verificadores (numérico e alfanumérico)
-- [ ] Core: retries com backoff limitado (respeitando `Retry-After`)
-- [ ] Core: cache TTL opcional em memória
+- [x] Core: retries com backoff limitado (respeitando `Retry-After`)
+- [x] Core: cache TTL opcional em memória
 - [x] CEP: ViaCEP + BrasilAPI com fallback, fixtures gravadas e normalização
       do endereço
 - [x] IBGE: UFs e municípios pela API oficial de localidades

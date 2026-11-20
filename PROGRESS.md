@@ -1,5 +1,22 @@
 # Progresso
 
+## 2026-11-20 — Etapa 8: retries com backoff e cache no core
+
+- `src/core/http.ts`: `retry` (padrão 2 tentativas extras, backoff exponencial com
+  full jitter, base 200 ms, teto 2 s, `Retry-After` aceito até 5 s) só para rede,
+  5xx, timeout e 429; `cache` opcional (TTL + LRU, cópias, junção de pedidos
+  simultâneos). `retryDelay` exportado e testado isoladamente.
+- Clientes: IBGE com retry padrão; CEP sem retry por provedor quando há fallback;
+  `cacheTtlMs`/`cacheMaxEntries` nos dois. API pública com `retry: false` (as
+  contas de capacidade continuam valendo).
+- 222 testes (24 novos de retry/cache); testes antigos de timeout passaram a
+  declarar `retry: false`, porque o timeout agora é repetido por padrão.
+
+### Próximo passo objetivo
+
+Fachada `createBrasilDevKit()` reunindo os módulos com opções comuns
+(`timeoutMs`, `retry`, `cacheTtlMs`) e definição do nome do pacote no npm.
+
 ## 2026-11-20 — Etapa 7: README novo e GIFs
 
 - README pt-BR e en-US redesenhados: banner animado, badges (CI, status da API,

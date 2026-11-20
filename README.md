@@ -51,13 +51,13 @@ tem um playground que chama a API ao vivo.
 
 ## O que tem aqui
 
-| Módulo        | O que faz                                                  | De onde vem o dado                                  | Rede? |
-| ------------- | ---------------------------------------------------------- | --------------------------------------------------- | ----- |
-| **CEP**       | Endereço normalizado, com o provedor que respondeu         | ViaCEP, com fallback para BrasilAPI                 | sim   |
-| **IBGE**      | 27 UFs e os municípios de cada uma, com divisões regionais | API de Localidades do IBGE                          | sim   |
-| **Feriados**  | Feriados nacionais e pontos facultativos federais do ano   | Leis federais e portarias anuais do governo federal | não   |
-| **CNPJ**      | Formato e dígitos verificadores, numérico e alfanumérico   | Manual oficial de DV (IN RFB nº 2.229/2024)         | não   |
-| **Core HTTP** | Timeout, `AbortSignal` e erros tipados                     |                                                     |       |
+| Módulo        | O que faz                                                              | De onde vem o dado                                  | Rede? |
+| ------------- | ---------------------------------------------------------------------- | --------------------------------------------------- | ----- |
+| **CEP**       | Endereço normalizado, com o provedor que respondeu                     | ViaCEP, com fallback para BrasilAPI                 | sim   |
+| **IBGE**      | 27 UFs e os municípios de cada uma, com divisões regionais             | API de Localidades do IBGE                          | sim   |
+| **Feriados**  | Feriados nacionais e pontos facultativos federais do ano               | Leis federais e portarias anuais do governo federal | não   |
+| **CNPJ**      | Formato e dígitos verificadores, numérico e alfanumérico               | Manual oficial de DV (IN RFB nº 2.229/2024)         | não   |
+| **Core HTTP** | Timeout, `AbortSignal`, retries com backoff, cache TTL e erros tipados |                                                     |       |
 
 Detalhes e fontes de cada módulo: [CEP](docs/cep.md) · [IBGE](docs/ibge.md) ·
 [Feriados](docs/feriados.md) · [CNPJ](docs/cnpj.md).
@@ -82,7 +82,7 @@ import {
   NotFoundError,
 } from 'brasil-dev-kit';
 
-const cep = createCepClient({ timeoutMs: 8000 });
+const cep = createCepClient({ timeoutMs: 8000, cacheTtlMs: 60_000 });
 
 try {
   const endereco = await cep.lookup('01310-100');
@@ -91,7 +91,10 @@ try {
   if (error instanceof NotFoundError) console.log('CEP não existe');
 }
 
-await createIbgeClient().listMunicipios('RR'); // 15 municípios, ordenados por nome
+// Falha passageira (rede, 5xx, timeout, 429) é repetida com backoff exponencial e jitter.
+const ibge = createIbgeClient({ retry: { retries: 3, maxDelayMs: 4000 }, cacheTtlMs: 86_400_000 });
+
+await ibge.listMunicipios('RR'); // 15 municípios, ordenados por nome
 getFeriadosNacionais(2026).origem; // 'portaria': feriados + pontos facultativos oficiais
 validateCnpj('12.ABC.345/01DE-35').kind; // 'alphanumeric'
 ```

@@ -51,13 +51,13 @@ playground that calls the API live.
 
 ## What's inside
 
-| Module        | What it does                                                    | Where the data comes from                          | Network? |
-| ------------- | --------------------------------------------------------------- | -------------------------------------------------- | -------- |
-| **CEP**       | Normalized address, with the provider that answered             | ViaCEP, falling back to BrasilAPI                  | yes      |
-| **IBGE**      | The 27 states and their municipalities, with regional divisions | IBGE Localidades API                               | yes      |
-| **Holidays**  | National holidays and federal optional days off for a year      | Federal laws and yearly federal decrees            | no       |
-| **CNPJ**      | Format and check digits, numeric and alphanumeric               | Official check-digit manual (IN RFB nº 2.229/2024) | no       |
-| **HTTP core** | Timeout, `AbortSignal` and typed errors                         |                                                    |          |
+| Module        | What it does                                                             | Where the data comes from                          | Network? |
+| ------------- | ------------------------------------------------------------------------ | -------------------------------------------------- | -------- |
+| **CEP**       | Normalized address, with the provider that answered                      | ViaCEP, falling back to BrasilAPI                  | yes      |
+| **IBGE**      | The 27 states and their municipalities, with regional divisions          | IBGE Localidades API                               | yes      |
+| **Holidays**  | National holidays and federal optional days off for a year               | Federal laws and yearly federal decrees            | no       |
+| **CNPJ**      | Format and check digits, numeric and alphanumeric                        | Official check-digit manual (IN RFB nº 2.229/2024) | no       |
+| **HTTP core** | Timeout, `AbortSignal`, retries with backoff, TTL cache and typed errors |                                                    |          |
 
 Field names in responses are in Portuguese (`municipio`, `logradouro`, `fonte`…),
 matching the official sources. Module docs (pt-BR): [CEP](docs/cep.md) ·
@@ -83,7 +83,7 @@ import {
   NotFoundError,
 } from 'brasil-dev-kit';
 
-const cep = createCepClient({ timeoutMs: 8000 });
+const cep = createCepClient({ timeoutMs: 8000, cacheTtlMs: 60_000 });
 
 try {
   const endereco = await cep.lookup('01310-100');
@@ -92,7 +92,10 @@ try {
   if (error instanceof NotFoundError) console.log('No such CEP');
 }
 
-await createIbgeClient().listMunicipios('RR'); // 15 municipalities, sorted by name
+// Transient failures (network, 5xx, timeout, 429) are retried with exponential backoff and jitter.
+const ibge = createIbgeClient({ retry: { retries: 3, maxDelayMs: 4000 }, cacheTtlMs: 86_400_000 });
+
+await ibge.listMunicipios('RR'); // 15 municipalities, sorted by name
 getFeriadosNacionais(2026).origem; // 'portaria': official holidays + optional days off
 validateCnpj('12.ABC.345/01DE-35').kind; // 'alphanumeric'
 ```

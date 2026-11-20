@@ -36,5 +36,9 @@ projeto adota o [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 - Página do projeto em `https://efer.online/projeto/brasil-dev-kit/` (`site/`), com
   playground da API e widget do GitHub alimentado pela rota `/v1/projeto/github`
   (cache de 10 minutos, fallback para o último dado bom).
+- Core HTTP: novas tentativas com backoff exponencial e jitter (`retry`), que
+  respeitam `Retry-After` e o cancelamento, e cache TTL opcional em memória
+  (`cache`, ou `cacheTtlMs` nos clientes de CEP e IBGE) com junção de pedidos
+  simultâneos.
 - README pt-BR/en-US com GIFs animados gerados a partir de saídas reais
   (`scripts/readme-gifs/`).
