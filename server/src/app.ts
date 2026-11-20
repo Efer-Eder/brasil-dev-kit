@@ -21,6 +21,7 @@ import {
 } from '../../src/index.js';
 import { SingleFlight, TtlCache } from './cache.js';
 import type { ServerConfig } from './config.js';
+import { createGithubCache } from './github.js';
 import { UpstreamBusyError, UpstreamGate } from './limiter.js';
 
 export const API_VERSION = '0.1.0';
@@ -86,6 +87,15 @@ export function createApp(deps: AppDeps): App {
   };
   const cep: CepClient = createCepClient(clientOptions);
   const ibge: IbgeClient = createIbgeClient(clientOptions);
+
+  const github = createGithubCache({
+    repo: config.github.repo,
+    ttlMs: config.github.ttlMs,
+    fetch: gatedFetch,
+    timeoutMs: config.upstreamTimeoutMs,
+    userAgent: clientOptions.userAgent,
+    now,
+  });
 
   const cepCache = new TtlCache<CepCacheValue>(config.cep.maxEntries, now);
   const cepFlight = new SingleFlight<CepCacheValue>();
@@ -165,6 +175,7 @@ export function createApp(deps: AppDeps): App {
           municipios: '/v1/ibge/ufs/{uf}/municipios',
           cnpj: '/v1/cnpj/{cnpj}',
           feriados: '/v1/feriados/{ano}',
+          github: '/v1/projeto/github',
           saude: '/v1/health',
         },
         aviso:
@@ -196,6 +207,14 @@ export function createApp(deps: AppDeps): App {
     }
     if (resource === 'cep' && rest.length === 1 && rest[0] !== undefined) {
       return getCep(rest[0]);
+    }
+    if (resource === 'projeto' && rest.length === 1 && rest[0] === 'github') {
+      const { value, cache } = await github.get();
+      return {
+        status: 200,
+        body: value,
+        headers: { 'cache-control': 'public, max-age=300', 'x-cache': cache },
+      };
     }
     if (resource === 'feriados' && rest.length === 1 && rest[0] !== undefined) {
       if (!/^\d{4}$/.test(rest[0])) {

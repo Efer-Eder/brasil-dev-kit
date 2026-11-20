@@ -22,6 +22,11 @@ export interface ServerConfig {
   ibge: {
     ttlMs: number;
   };
+  github: {
+    /** Repositório exibido no widget da página do projeto (`dono/nome`). */
+    repo: string;
+    ttlMs: number;
+  };
   upstream: {
     maxConcurrent: number;
     maxQueue: number;
@@ -43,6 +48,7 @@ export const DEFAULT_CONFIG: ServerConfig = {
   upstreamTimeoutMs: 4_000,
   cep: { maxEntries: 50_000, ttlFoundMs: 7 * DAY, ttlNotFoundMs: 6 * HOUR },
   ibge: { ttlMs: DAY },
+  github: { repo: 'Efer-Eder/brasil-dev-kit', ttlMs: 10 * 60 * 1000 },
   upstream: { maxConcurrent: 4, maxQueue: 16, ratePerSecond: 4, burst: 8 },
 };
 
@@ -72,6 +78,10 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
       ttlNotFoundMs: readInt(env, 'CEP_CACHE_TTL_NOT_FOUND_MS', d.cep.ttlNotFoundMs),
     },
     ibge: { ttlMs: readInt(env, 'IBGE_CACHE_TTL_MS', d.ibge.ttlMs) },
+    github: {
+      repo: env.GITHUB_REPO && env.GITHUB_REPO !== '' ? env.GITHUB_REPO : d.github.repo,
+      ttlMs: readInt(env, 'GITHUB_CACHE_TTL_MS', d.github.ttlMs),
+    },
     upstream: {
       maxConcurrent: readInt(env, 'UPSTREAM_MAX_CONCURRENT', d.upstream.maxConcurrent),
       maxQueue: readInt(env, 'UPSTREAM_MAX_QUEUE', d.upstream.maxQueue, 0),

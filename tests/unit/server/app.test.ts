@@ -289,3 +289,120 @@ describe('API — feriados', () => {
     expect(res.body).toMatchObject({ erro: { codigo: 'VALIDATION_ERROR' } });
   });
 });
+
+describe('API — resumo do GitHub', () => {
+  const GH = 'https://api.github.com/repos/Efer-Eder/brasil-dev-kit';
+  const ghRoutes = (repoStatus = 200): Record<string, Route> => ({
+    [GH]: {
+      status: repoStatus,
+      body: JSON.stringify({
+        full_name: 'Efer-Eder/brasil-dev-kit',
+        html_url: 'https://github.com/Efer-Eder/brasil-dev-kit',
+        description: 'SDK',
+        license: { spdx_id: 'MIT' },
+        language: 'TypeScript',
+        created_at: '2026-11-20T21:41:45Z',
+        pushed_at: '2026-11-20T22:33:00Z',
+        stargazers_count: 3,
+        forks_count: 1,
+        subscribers_count: 2,
+        open_issues_count: 3,
+      }),
+    },
+    [`${GH}/contributors?per_page=20`]: {
+      body: JSON.stringify([
+        {
+          login: 'Efer-Eder',
+          html_url: 'https://github.com/Efer-Eder',
+          contributions: 36,
+          type: 'User',
+        },
+        {
+          login: 'dependabot[bot]',
+          html_url: 'https://github.com/apps/dependabot',
+          contributions: 2,
+          type: 'Bot',
+        },
+      ]),
+    },
+    [`${GH}/commits?per_page=5`]: {
+      body: JSON.stringify([
+        {
+          sha: 'caa854c951b53ec846c4798251bcc83b8edff51e',
+          html_url: 'https://github.com/Efer-Eder/brasil-dev-kit/commit/caa854c',
+          commit: {
+            message: 'docs(feriados): document sources\n\ncorpo',
+            author: { name: 'Efer', date: '2026-11-20T22:32:56Z' },
+          },
+          author: { login: 'Efer-Eder' },
+        },
+      ]),
+    },
+    [`${GH}/issues?state=open&per_page=100`]: {
+      body: JSON.stringify([
+        { number: 3 },
+        { number: 2, pull_request: {} },
+        { number: 1, pull_request: {} },
+      ]),
+    },
+    [`${GH}/actions/workflows/ci.yml/runs?branch=main&per_page=1`]: {
+      body: JSON.stringify({
+        workflow_runs: [
+          {
+            status: 'completed',
+            conclusion: 'success',
+            html_url: 'https://github.com/x/runs/1',
+            created_at: '2026-11-20T22:33:02Z',
+            head_sha: 'caa854c951b',
+          },
+        ],
+      }),
+    },
+  });
+
+  it('resume repositório, separa issues de PRs, ignora bots e faz cache', async () => {
+    const { fetch, calls } = routedFetch(ghRoutes());
+    const { get } = await start(fetch);
+    const first = await get('/v1/projeto/github');
+    expect(first.status).toBe(200);
+    expect(first.headers.get('x-cache')).toBe('MISS');
+    expect(first.body).toMatchObject({
+      repositorio: { estrelas: 3, forks: 1, issuesAbertas: 1, prsAbertos: 2, licenca: 'MIT' },
+      ci: { conclusao: 'success', commit: 'caa854c' },
+      contribuidores: [{ login: 'Efer-Eder', contribuicoes: 36 }],
+      totalCommits: 36,
+      commits: [
+        { sha: 'caa854c', mensagem: 'docs(feriados): document sources', autor: 'Efer-Eder' },
+      ],
+      desatualizado: false,
+    });
+    const second = await get('/v1/projeto/github');
+    expect(second.headers.get('x-cache')).toBe('HIT');
+    expect(calls).toHaveLength(5);
+  });
+
+  it('GitHub fora do ar sem dado anterior → 502', async () => {
+    const { fetch } = routedFetch(ghRoutes(503));
+    const { get } = await start(fetch);
+    expect((await get('/v1/projeto/github')).status).toBe(502);
+  });
+
+  it('GitHub fora do ar com dado anterior → serve o último, marcado como desatualizado', async () => {
+    let now = 0;
+    const routes = ghRoutes();
+    const { fetch } = routedFetch(routes);
+    const app = createApp({ config: DEFAULT_CONFIG, fetch, now: () => now });
+    const server = createServer((req, res) => void app.handle(req, res));
+    servers.push(server);
+    await new Promise<void>((r) => server.listen(0, '127.0.0.1', r));
+    const { port } = server.address() as AddressInfo;
+    const url = `http://127.0.0.1:${port}/v1/projeto/github`;
+    expect((await globalThis.fetch(url)).status).toBe(200);
+    now = DEFAULT_CONFIG.github.ttlMs + 1;
+    routes[GH] = { status: 500, body: '' };
+    const stale = await globalThis.fetch(url);
+    expect(stale.status).toBe(200);
+    expect(stale.headers.get('x-cache')).toBe('STALE');
+    expect(await stale.json()).toMatchObject({ desatualizado: true, repositorio: { estrelas: 3 } });
+  });
+});
