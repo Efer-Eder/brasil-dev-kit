@@ -1,152 +1,176 @@
-# Brasil Dev Kit
+<div align="center">
+
+<a href="https://efer.online/projeto/brasil-dev-kit/">
+  <img src="docs/assets/readme/hero-en.gif" width="880" alt="Brasil Dev Kit: Brazilian public data with types, provenance and predictable errors">
+</a>
+
+<br><br>
 
 [![CI](https://github.com/Efer-Eder/brasil-dev-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/Efer-Eder/brasil-dev-kit/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![API](https://img.shields.io/website?url=https%3A%2F%2Fefer.online%2Fapi%2Fbrasil-dev-kit%2Fv1%2Fhealth&label=API&up_message=online&down_message=offline&style=flat-square)](https://efer.online/api/brasil-dev-kit/)
+[![MIT License](https://img.shields.io/badge/license-MIT-7377F0?style=flat-square)](LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white)](tsconfig.json)
+[![Node](https://img.shields.io/badge/node-%E2%89%A5%2022.12-5FA04E?style=flat-square&logo=nodedotjs&logoColor=white)](package.json)
+[![Stars](https://img.shields.io/github/stars/Efer-Eder/brasil-dev-kit?style=flat-square&color=7377F0)](https://github.com/Efer-Eder/brasil-dev-kit/stargazers)
 
-[🇧🇷 Português](README.md) · 🇺🇸 English
+**[Project page](https://efer.online/projeto/brasil-dev-kit/)** ·
+**[Try the API](https://efer.online/projeto/brasil-dev-kit/#api)** ·
+[Docs (pt-BR)](docs/) ·
+[Roadmap](ROADMAP.md) ·
+[Português](README.md)
 
-A **TypeScript-first** SDK to consume and normalize Brazilian public data
-(postal codes/CEP, IBGE, holidays, CNPJ) with a typed API, predictable errors and
-clear data provenance.
+</div>
 
-🌐 **Project page with a live API playground:** https://efer.online/projeto/brasil-dev-kit/
+---
 
-> ⚠️ **Work in progress.** Nothing is published on npm yet. This page only shows
-> what already exists in the code; everything else is in the [ROADMAP](ROADMAP.md).
-> The imports below use the provisional name `brasil-dev-kit`; the final npm
-> package name is not decided yet. For now, use it from source.
+CEP (Brazilian postal codes), IBGE states and municipalities, national holidays
+and CNPJ (company tax ID) validation, including the new **alphanumeric** CNPJ, in a
+**TypeScript SDK** and a **public HTTP API**. Every response says where the data
+came from, every error has a stable code, and nothing depends on a paid key.
 
-## What works today
+> [!NOTE]
+> **Work in progress.** The SDK is not on npm yet (use it from source) and the API
+> is free, with no availability guarantee. This README only shows what already
+> exists; the rest is in the [ROADMAP](ROADMAP.md).
 
-| Feature                                                      | Status                    |
-| ------------------------------------------------------------ | ------------------------- |
-| HTTP client with timeout, `AbortSignal` and typed errors     | ✅ implemented and tested |
-| Numeric and **alphanumeric** CNPJ validation (check digits)  | ✅ implemented and tested |
-| CEP lookup (ViaCEP and BrasilAPI, with fallback)             | ✅ implemented and tested |
-| States and municipalities (IBGE Localidades API)             | ✅ implemented and tested |
-| National holidays and federal optional days (laws + decrees) | ✅ implemented and tested |
-| Retries with backoff and in-memory cache                     | 🗓️ planned                |
+## Try it now
 
-## Public API (nothing to install)
+Nothing to install, straight from your terminal:
 
-The same features are available over HTTP at
-**`https://efer.online/api/brasil-dev-kit/`** — free, cached, limited to 10
-requests/s per IP, with no availability guarantee. Details (in Portuguese):
-[docs/api.md](docs/api.md).
+<a href="docs/assets/readme/terminal-en.gif"><img src="docs/assets/readme/terminal-en.gif" width="880" alt="Terminal calling the public API: CEP, 2026 holidays and alphanumeric CNPJ"></a>
 
 ```powershell
 curl https://efer.online/api/brasil-dev-kit/v1/cep/01310-100
+curl https://efer.online/api/brasil-dev-kit/v1/feriados/2026
 curl https://efer.online/api/brasil-dev-kit/v1/ibge/ufs/SP/municipios
 curl https://efer.online/api/brasil-dev-kit/v1/cnpj/12ABC34501DE35
-curl https://efer.online/api/brasil-dev-kit/v1/feriados/2026
 ```
 
-## CEP lookup
+Rather click? The [project page](https://efer.online/projeto/brasil-dev-kit/) has a
+playground that calls the API live.
 
-CEP is the Brazilian postal code. Lookups use ViaCEP and fall back to BrasilAPI
-when it is unavailable. The result is normalized (field names are in Portuguese)
-and says which provider answered. Details (in Portuguese): [docs/cep.md](docs/cep.md).
+## What's inside
 
-```ts
-import { createCepClient, NotFoundError } from 'brasil-dev-kit';
+| Module        | What it does                                                    | Where the data comes from                          | Network? |
+| ------------- | --------------------------------------------------------------- | -------------------------------------------------- | -------- |
+| **CEP**       | Normalized address, with the provider that answered             | ViaCEP, falling back to BrasilAPI                  | yes      |
+| **IBGE**      | The 27 states and their municipalities, with regional divisions | IBGE Localidades API                               | yes      |
+| **Holidays**  | National holidays and federal optional days off for a year      | Federal laws and yearly federal decrees            | no       |
+| **CNPJ**      | Format and check digits, numeric and alphanumeric               | Official check-digit manual (IN RFB nº 2.229/2024) | no       |
+| **HTTP core** | Timeout, `AbortSignal` and typed errors                         |                                                    |          |
 
-const cep = createCepClient({ timeoutMs: 8000 });
+Field names in responses are in Portuguese (`municipio`, `logradouro`, `fonte`…),
+matching the official sources. Module docs (pt-BR): [CEP](docs/cep.md) ·
+[IBGE](docs/ibge.md) · [Holidays](docs/feriados.md) · [CNPJ](docs/cnpj.md).
 
-const endereco = await cep.lookup('01310-100');
-// { cep: '01310100', uf: 'SP', municipio: 'São Paulo', bairro: 'Bela Vista',
-//   logradouro: 'Avenida Paulista', complemento: 'de 612 a 1510 - lado par',
-//   codigoIbgeMunicipio: '3550308', fonte: { provedor: 'viacep', servicoOrigem: null } }
+## In your code
 
-await cep.lookup('00000-000'); // throws NotFoundError
-```
-
-> Lookups hit free third-party services with no availability guarantee. ViaCEP
-> may block heavy users: do not use this to validate whole CEP databases.
-
-## States and municipalities (IBGE)
-
-Data from IBGE's official Localidades API. Details (in Portuguese): [docs/ibge.md](docs/ibge.md).
-
-```ts
-import { createIbgeClient } from 'brasil-dev-kit';
-
-const ibge = createIbgeClient();
-const ufs = await ibge.listUfs(); // 27 states with region, sorted by name
-const municipios = await ibge.listMunicipios('RR'); // or by code: 14
-```
-
-## National holidays
-
-Holidays from federal law and, when published and checked, the yearly federal
-government decree (portaria) with optional days off (2025 and 2026 today). No
-network calls. Details (in Portuguese): [docs/feriados.md](docs/feriados.md).
-
-```ts
-import { getFeriadosNacionais, isFeriadoNacional } from 'brasil-dev-kit';
-
-getFeriadosNacionais(2026); // { origem: 'portaria', datas: [19 items], fontes, avisos }
-isFeriadoNacional('2026-11-20'); // true
-```
-
-## CNPJ validation
-
-CNPJ is the Brazilian company tax ID. Since IN RFB nº 2.229/2024 it may contain
-uppercase letters in its first 12 characters. The implementation follows the
-official check-digit manual published by Serpro/Receita Federal. Details and
-sources (in Portuguese): [docs/cnpj.md](docs/cnpj.md).
-
-```ts
-import { validateCnpj, isValidCnpj, formatCnpj } from 'brasil-dev-kit';
-
-validateCnpj('12.ABC.345/01DE-35');
-// { valid: true, normalized: '12ABC34501DE35', formatted: '12.ABC.345/01DE-35', kind: 'alphanumeric' }
-
-isValidCnpj('11.222.333/0001-81'); // true
-formatCnpj('11222333000181'); // '11.222.333/0001-81'
-```
-
-> Validation checks **format and check digits only**. It does not prove that the
-> CNPJ exists or is active/regular at Receita Federal.
-
-## HTTP client
-
-The foundation of the data adapters (used by the CEP module). Uses native `fetch`, no dependencies.
-
-```ts
-import { createHttpClient, TimeoutError } from 'brasil-dev-kit';
-
-const http = createHttpClient({ baseUrl: 'https://example.test/api', timeoutMs: 5000 });
-const data = await http.getJson('/resource', { query: { uf: 'SP' } }); // `unknown`: validate it
-```
-
-Errors: `ValidationError`, `NotFoundError`, `RateLimitError` (with `retryAfterMs`),
-`TimeoutError`, `ProviderUnavailableError` and `HttpError`, all with a stable
-`code` and extending `BrasilDevKitError`.
-
-## Running locally (Windows, macOS or Linux)
-
-Requires **Node.js ≥ 22.12**, Git and **pnpm 12** (pinned in `packageManager`;
-install with `npm install -g pnpm@12.21.0`).
+<a href="docs/assets/readme/sdk-en.gif"><img src="docs/assets/readme/sdk-en.gif" width="880" alt="Editor with a TypeScript example and its real output"></a>
 
 ```powershell
 git clone https://github.com/Efer-Eder/brasil-dev-kit.git
 cd brasil-dev-kit
 pnpm install
-pnpm test
 pnpm build
-node examples/node/cnpj.mjs
-node examples/node/cep.mjs 01310-100
-node examples/node/ibge.mjs RR
-node examples/node/feriados.mjs 2026
 ```
 
-Without a global pnpm, replace `pnpm` with `npx pnpm@12.21.0`.
+```ts
+import {
+  createCepClient,
+  createIbgeClient,
+  getFeriadosNacionais,
+  validateCnpj,
+  NotFoundError,
+} from 'brasil-dev-kit';
+
+const cep = createCepClient({ timeoutMs: 8000 });
+
+try {
+  const endereco = await cep.lookup('01310-100');
+  // { uf: 'SP', municipio: 'São Paulo', logradouro: 'Avenida Paulista', fonte: { provedor: 'viacep' }, ... }
+} catch (error) {
+  if (error instanceof NotFoundError) console.log('No such CEP');
+}
+
+await createIbgeClient().listMunicipios('RR'); // 15 municipalities, sorted by name
+getFeriadosNacionais(2026).origem; // 'portaria': official holidays + optional days off
+validateCnpj('12.ABC.345/01DE-35').kind; // 'alphanumeric'
+```
+
+> [!IMPORTANT]
+> CNPJ validation checks **format and check digits only**. It does not tell you
+> whether the company exists or is active at Receita Federal.
+
+## Public API
+
+Base: **`https://efer.online/api/brasil-dev-kit/`**
+
+| Route                              | Returns                                          |
+| ---------------------------------- | ------------------------------------------------ |
+| `GET /v1/cep/{cep}`                | Normalized address                               |
+| `GET /v1/ibge/ufs`                 | States with region                               |
+| `GET /v1/ibge/ufs/{uf}/municipios` | Municipalities of a state (code or abbreviation) |
+| `GET /v1/feriados/{ano}`           | Holidays and optional days off                   |
+| `GET /v1/cnpj/{cnpj}`              | CNPJ validation                                  |
+| `GET /v1/health`                   | API health                                       |
+
+| Limit                | Value                                                    |
+| -------------------- | -------------------------------------------------------- |
+| Requests per IP      | 10/s, burst of 30 (above that: `429` with `Retry-After`) |
+| CEP cache            | 7 days (not found: 6 h)                                  |
+| Timeout per provider | 4 s                                                      |
+| Measured throughput  | ~880 req/s with a warm cache, on half a CPU              |
+
+Errors are always JSON: `{ "erro": { "codigo": "NOT_FOUND", "mensagem": "..." } }`.
+Routes, error codes and the capacity math (pt-BR): [docs/api.md](docs/api.md).
+
+## Typed errors
+
+| Class                      | `code`                 | When                                           |
+| -------------------------- | ---------------------- | ---------------------------------------------- |
+| `ValidationError`          | `VALIDATION_ERROR`     | Invalid input (no request is made)             |
+| `NotFoundError`            | `NOT_FOUND`            | The data does not exist at the provider        |
+| `RateLimitError`           | `RATE_LIMIT`           | The provider rate limited (has `retryAfterMs`) |
+| `TimeoutError`             | `TIMEOUT`              | The time limit was exceeded                    |
+| `ProviderUnavailableError` | `PROVIDER_UNAVAILABLE` | Network, 5xx or malformed response             |
+| `HttpError`                | `HTTP_ERROR`           | Any other unexpected HTTP status               |
+
+All of them extend `BrasilDevKitError`.
+
+## Running locally
+
+Requires **Node.js ≥ 22.12**, Git and **pnpm 12** (without a global pnpm, use
+`npx pnpm@12.21.0`).
+
+```powershell
+pnpm install
+pnpm run check               # lint + typecheck + tests + build
+pnpm test:integration        # optional: tests against the real APIs
+node dist-server/server.js   # local API at http://127.0.0.1:8795
+node examples/node/cep.mjs 01310-100
+```
+
+The GIFs in this README are generated by
+[`scripts/readme-gifs/make_gifs.py`](scripts/readme-gifs/make_gifs.py) from real API
+and SDK output.
+
+## Documentation (pt-BR)
+
+- [Public API: routes, errors and capacity](docs/api.md) · [Deploy](docs/deploy.md)
+- [CEP](docs/cep.md) · [IBGE](docs/ibge.md) · [Holidays](docs/feriados.md) · [CNPJ](docs/cnpj.md)
+- [Architecture](docs/architecture.md) · [Decisions (ADRs)](docs/adr/)
+- [Progress](PROGRESS.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md)
 
 ## Contributing
 
-Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) and the
-[Code of Conduct](CODE_OF_CONDUCT.md). Security issues: [SECURITY.md](SECURITY.md).
+Issues and pull requests are welcome. See [CONTRIBUTING](CONTRIBUTING.md): every
+integration cites the official documentation and ships with tests against real
+recorded responses. Security issues: [SECURITY](SECURITY.md).
 
-## License
+---
 
-[MIT](LICENSE) © Efer Eder
+<div align="center">
+
+[MIT](LICENSE) © Efer Eder · made at [efer.online](https://efer.online)
+
+</div>

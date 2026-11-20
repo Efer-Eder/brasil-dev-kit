@@ -1,177 +1,174 @@
-# Brasil Dev Kit
+<div align="center">
+
+<a href="https://efer.online/projeto/brasil-dev-kit/">
+  <img src="docs/assets/readme/hero-pt.gif" width="880" alt="Brasil Dev Kit: dados públicos brasileiros com tipos, fonte e erros previsíveis">
+</a>
+
+<br><br>
 
 [![CI](https://github.com/Efer-Eder/brasil-dev-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/Efer-Eder/brasil-dev-kit/actions/workflows/ci.yml)
-[![Licença: MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-blue.svg)](LICENSE)
+[![API](https://img.shields.io/website?url=https%3A%2F%2Fefer.online%2Fapi%2Fbrasil-dev-kit%2Fv1%2Fhealth&label=API&up_message=online&down_message=offline&style=flat-square)](https://efer.online/api/brasil-dev-kit/)
+[![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-7377F0?style=flat-square)](LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white)](tsconfig.json)
+[![Node](https://img.shields.io/badge/node-%E2%89%A5%2022.12-5FA04E?style=flat-square&logo=nodedotjs&logoColor=white)](package.json)
+[![Estrelas](https://img.shields.io/github/stars/Efer-Eder/brasil-dev-kit?style=flat-square&color=7377F0)](https://github.com/Efer-Eder/brasil-dev-kit/stargazers)
 
-🇧🇷 Português · [🇺🇸 English](README.en.md)
+**[Página do projeto](https://efer.online/projeto/brasil-dev-kit/)** ·
+**[Testar a API](https://efer.online/projeto/brasil-dev-kit/#api)** ·
+[Documentação](docs/) ·
+[Roadmap](ROADMAP.md) ·
+[English](README.en.md)
 
-SDK **TypeScript-first** para consumir e padronizar dados públicos brasileiros
-(CEP, IBGE, feriados, CNPJ) com API tipada, erros previsíveis e procedência clara.
+</div>
 
-🌐 **Página do projeto, com playground da API:** https://efer.online/projeto/brasil-dev-kit/
+---
 
-> ⚠️ **Em desenvolvimento.** Ainda não há versão publicada no npm. Esta página
-> mostra apenas o que já existe no código; o restante está no [ROADMAP](ROADMAP.md).
-> Os `import` abaixo usam o nome provisório `brasil-dev-kit`; o nome final do
-> pacote no npm ainda será definido. Por enquanto, use a partir do código-fonte.
+CEP, UFs e municípios do IBGE, feriados nacionais e validação de CNPJ (inclusive
+o **alfanumérico**) num **SDK TypeScript** e numa **API HTTP pública**. Cada
+resposta diz de onde veio o dado, todo erro tem um código estável e nada depende
+de chave paga.
 
-## O que já funciona
+> [!NOTE]
+> **Em desenvolvimento.** O SDK ainda não está no npm (use a partir do código) e a
+> API é gratuita, sem garantia de disponibilidade. Este README só mostra o que já
+> existe; o resto está no [ROADMAP](ROADMAP.md).
 
-| Recurso                                                               | Estado                    |
-| --------------------------------------------------------------------- | ------------------------- |
-| Cliente HTTP com timeout, `AbortSignal` e erros tipados               | ✅ implementado e testado |
-| Validação de CNPJ numérico e **alfanumérico** (dígitos verificadores) | ✅ implementado e testado |
-| Consulta de CEP (ViaCEP e BrasilAPI, com fallback)                    | ✅ implementado e testado |
-| UFs e municípios (API de Localidades do IBGE)                         | ✅ implementado e testado |
-| Feriados nacionais e pontos facultativos federais (leis + portarias)  | ✅ implementado e testado |
-| Retries com backoff e cache em memória                                | 🗓️ planejado              |
+## Experimente agora
 
-## API pública (sem instalar nada)
+Sem instalar nada, direto do terminal:
 
-Os mesmos recursos estão disponíveis por HTTP em
-**`https://efer.online/api/brasil-dev-kit/`** — gratuita, com cache e limite de
-10 requisições/s por IP, sem garantia de disponibilidade. Detalhes, erros e as
-contas de capacidade em [docs/api.md](docs/api.md).
+<a href="docs/assets/readme/terminal-pt.gif"><img src="docs/assets/readme/terminal-pt.gif" width="880" alt="Terminal consultando a API pública: CEP, feriados de 2026 e CNPJ alfanumérico"></a>
 
 ```powershell
 curl https://efer.online/api/brasil-dev-kit/v1/cep/01310-100
+curl https://efer.online/api/brasil-dev-kit/v1/feriados/2026
 curl https://efer.online/api/brasil-dev-kit/v1/ibge/ufs/SP/municipios
 curl https://efer.online/api/brasil-dev-kit/v1/cnpj/12ABC34501DE35
-curl https://efer.online/api/brasil-dev-kit/v1/feriados/2026
 ```
 
-## Consulta de CEP
+Prefere clicar? A [página do projeto](https://efer.online/projeto/brasil-dev-kit/)
+tem um playground que chama a API ao vivo.
 
-Usa o ViaCEP e, se ele estiver indisponível, o BrasilAPI. O resultado é
-normalizado e informa de qual provedor veio. Detalhes em [docs/cep.md](docs/cep.md).
+## O que tem aqui
 
-```ts
-import { createCepClient, NotFoundError } from 'brasil-dev-kit';
+| Módulo        | O que faz                                                  | De onde vem o dado                                  | Rede? |
+| ------------- | ---------------------------------------------------------- | --------------------------------------------------- | ----- |
+| **CEP**       | Endereço normalizado, com o provedor que respondeu         | ViaCEP, com fallback para BrasilAPI                 | sim   |
+| **IBGE**      | 27 UFs e os municípios de cada uma, com divisões regionais | API de Localidades do IBGE                          | sim   |
+| **Feriados**  | Feriados nacionais e pontos facultativos federais do ano   | Leis federais e portarias anuais do governo federal | não   |
+| **CNPJ**      | Formato e dígitos verificadores, numérico e alfanumérico   | Manual oficial de DV (IN RFB nº 2.229/2024)         | não   |
+| **Core HTTP** | Timeout, `AbortSignal` e erros tipados                     |                                                     |       |
 
-const cep = createCepClient({ timeoutMs: 8000 });
+Detalhes e fontes de cada módulo: [CEP](docs/cep.md) · [IBGE](docs/ibge.md) ·
+[Feriados](docs/feriados.md) · [CNPJ](docs/cnpj.md).
 
-const endereco = await cep.lookup('01310-100');
-// { cep: '01310100', uf: 'SP', municipio: 'São Paulo', bairro: 'Bela Vista',
-//   logradouro: 'Avenida Paulista', complemento: 'de 612 a 1510 - lado par',
-//   codigoIbgeMunicipio: '3550308', fonte: { provedor: 'viacep', servicoOrigem: null } }
+## No seu código
 
-await cep.lookup('00000-000'); // lança NotFoundError
-```
-
-> As consultas vão para serviços públicos de terceiros, sem garantia de
-> disponibilidade. O ViaCEP pode bloquear quem faz uso massivo: não use para
-> validar bases inteiras de CEPs.
-
-## UFs e municípios (IBGE)
-
-Dados da API de Localidades do IBGE, a fonte oficial. Detalhes em [docs/ibge.md](docs/ibge.md).
-
-```ts
-import { createIbgeClient } from 'brasil-dev-kit';
-
-const ibge = createIbgeClient();
-
-const ufs = await ibge.listUfs(); // 27 UFs com região, ordenadas por nome
-const municipios = await ibge.listMunicipios('RR'); // ou pelo código: 14
-// [{ codigoIbge: '1400050', nome: 'Alto Alegre', uf: 'RR', microrregiao: {…},
-//    mesorregiao: {…}, regiaoImediata: {…}, regiaoIntermediaria: {…} }, …]
-```
-
-## Feriados nacionais
-
-Feriados das leis federais e, quando já publicada e conferida, a portaria anual do
-governo federal com os pontos facultativos (2025 e 2026 hoje). Sem requisições.
-Detalhes e fontes em [docs/feriados.md](docs/feriados.md).
-
-```ts
-import { getFeriadosNacionais, isFeriadoNacional } from 'brasil-dev-kit';
-
-getFeriadosNacionais(2026); // { origem: 'portaria', datas: [19 itens], fontes, avisos }
-isFeriadoNacional('2026-11-20'); // true
-isFeriadoNacional('2026-02-16'); // false (Carnaval é ponto facultativo)
-```
-
-## Validação de CNPJ
-
-Segue o manual oficial de cálculo do DV do CNPJ alfanumérico (Serpro/Receita
-Federal, IN RFB nº 2.229/2024). Detalhes e fontes em [docs/cnpj.md](docs/cnpj.md).
-
-```ts
-import { validateCnpj, isValidCnpj, formatCnpj } from 'brasil-dev-kit';
-
-validateCnpj('12.ABC.345/01DE-35');
-// { valid: true, normalized: '12ABC34501DE35', formatted: '12.ABC.345/01DE-35', kind: 'alphanumeric' }
-
-validateCnpj('11222333000182');
-// { valid: false, reason: 'invalid_check_digits', message: 'Dígitos verificadores não conferem.' }
-
-isValidCnpj('11.222.333/0001-81'); // true
-formatCnpj('11222333000181'); // '11.222.333/0001-81'
-```
-
-> A validação confere **apenas formato e dígitos verificadores**. Ela não atesta
-> que o CNPJ existe, está ativo ou regular na Receita Federal.
-
-## Cliente HTTP
-
-Base dos adaptadores de dados (usado pelo módulo de CEP). Usa o `fetch` nativo, sem dependências.
-
-```ts
-import { createHttpClient, TimeoutError, NotFoundError } from 'brasil-dev-kit';
-
-const http = createHttpClient({ baseUrl: 'https://exemplo.test/api', timeoutMs: 5000 });
-
-try {
-  const data = await http.getJson('/recurso', { query: { uf: 'SP' } });
-  // `data` é `unknown`: valide antes de usar.
-} catch (error) {
-  if (error instanceof TimeoutError) console.error('Demorou demais', error.timeoutMs);
-  if (error instanceof NotFoundError) console.error('Não encontrado');
-}
-```
-
-Erros disponíveis: `ValidationError`, `NotFoundError`, `RateLimitError`
-(com `retryAfterMs`), `TimeoutError`, `ProviderUnavailableError` e `HttpError`,
-todos com `code` estável e herdando de `BrasilDevKitError`.
-
-## Rodando localmente (Windows, macOS ou Linux)
-
-Requisitos: **Node.js ≥ 22.12**, Git e **pnpm 12** (versão fixada em
-`packageManager`; instale com `npm install -g pnpm@12.21.0`).
+<a href="docs/assets/readme/sdk-pt.gif"><img src="docs/assets/readme/sdk-pt.gif" width="880" alt="Editor com exemplo em TypeScript e a saída real ao lado"></a>
 
 ```powershell
 git clone https://github.com/Efer-Eder/brasil-dev-kit.git
 cd brasil-dev-kit
 pnpm install
-pnpm test
 pnpm build
-node examples/node/cnpj.mjs
-node examples/node/cep.mjs 01310-100
-node examples/node/ibge.mjs RR
-node examples/node/feriados.mjs 2026
 ```
 
-Sem instalar o pnpm globalmente, troque `pnpm` por `npx pnpm@12.21.0`.
-Scripts disponíveis: `build`, `lint`, `lint:fix`, `typecheck`, `test`,
-`check` (roda tudo).
+```ts
+import {
+  createCepClient,
+  createIbgeClient,
+  getFeriadosNacionais,
+  validateCnpj,
+  NotFoundError,
+} from 'brasil-dev-kit';
+
+const cep = createCepClient({ timeoutMs: 8000 });
+
+try {
+  const endereco = await cep.lookup('01310-100');
+  // { uf: 'SP', municipio: 'São Paulo', logradouro: 'Avenida Paulista', fonte: { provedor: 'viacep' }, ... }
+} catch (error) {
+  if (error instanceof NotFoundError) console.log('CEP não existe');
+}
+
+await createIbgeClient().listMunicipios('RR'); // 15 municípios, ordenados por nome
+getFeriadosNacionais(2026).origem; // 'portaria': feriados + pontos facultativos oficiais
+validateCnpj('12.ABC.345/01DE-35').kind; // 'alphanumeric'
+```
+
+> [!IMPORTANT]
+> A validação de CNPJ confere **apenas formato e dígitos verificadores**. Ela não
+> diz se a empresa existe ou está regular na Receita Federal.
+
+## API pública
+
+Base: **`https://efer.online/api/brasil-dev-kit/`**
+
+| Rota                               | Devolve                            |
+| ---------------------------------- | ---------------------------------- |
+| `GET /v1/cep/{cep}`                | Endereço normalizado               |
+| `GET /v1/ibge/ufs`                 | UFs com região                     |
+| `GET /v1/ibge/ufs/{uf}/municipios` | Municípios da UF (sigla ou código) |
+| `GET /v1/feriados/{ano}`           | Feriados e pontos facultativos     |
+| `GET /v1/cnpj/{cnpj}`              | Validação de CNPJ                  |
+| `GET /v1/health`                   | Saúde da API                       |
+
+| Limite               | Valor                                                     |
+| -------------------- | --------------------------------------------------------- |
+| Requisições por IP   | 10/s, rajada de 30 (acima disso: `429` com `Retry-After`) |
+| Cache de CEP         | 7 dias (inexistente: 6 h)                                 |
+| Timeout por provedor | 4 s                                                       |
+| Vazão medida         | ~880 req/s com cache quente, em meia CPU                  |
+
+Erros sempre em JSON: `{ "erro": { "codigo": "NOT_FOUND", "mensagem": "..." } }`.
+Rotas, códigos de erro e as contas de capacidade em [docs/api.md](docs/api.md).
+
+## Erros tipados
+
+| Classe                     | `code`                 | Quando                                        |
+| -------------------------- | ---------------------- | --------------------------------------------- |
+| `ValidationError`          | `VALIDATION_ERROR`     | Entrada inválida (nenhuma requisição é feita) |
+| `NotFoundError`            | `NOT_FOUND`            | O dado não existe no provedor                 |
+| `RateLimitError`           | `RATE_LIMIT`           | Provedor limitou (traz `retryAfterMs`)        |
+| `TimeoutError`             | `TIMEOUT`              | Passou do tempo limite                        |
+| `ProviderUnavailableError` | `PROVIDER_UNAVAILABLE` | Rede, 5xx ou resposta fora do formato         |
+| `HttpError`                | `HTTP_ERROR`           | Outro status HTTP inesperado                  |
+
+Todos herdam de `BrasilDevKitError`.
+
+## Rodando localmente
+
+Requisitos: **Node.js ≥ 22.12**, Git e **pnpm 12** (sem pnpm global, use
+`npx pnpm@12.21.0`).
+
+```powershell
+pnpm install
+pnpm run check               # lint + typecheck + testes + build
+pnpm test:integration        # opcional: testa contra as APIs reais
+node dist-server/server.js   # API local em http://127.0.0.1:8795
+node examples/node/cep.mjs 01310-100
+```
+
+Os GIFs deste README são gerados por [`scripts/readme-gifs/make_gifs.py`](scripts/readme-gifs/make_gifs.py)
+com saídas reais da API e do SDK.
 
 ## Documentação
 
-- [Arquitetura](docs/architecture.md)
-- [Regras de CNPJ e fontes oficiais](docs/cnpj.md)
-- [Consulta de CEP: provedores, fallback e limites](docs/cep.md)
-- [UFs e municípios (IBGE)](docs/ibge.md)
-- [Feriados nacionais: fontes e regras](docs/feriados.md)
-- [API pública: rotas, erros e capacidade](docs/api.md)
-- [Deploy da API](docs/deploy.md)
-- [Decisões técnicas (ADRs)](docs/adr/)
+- [API pública: rotas, erros e capacidade](docs/api.md) · [Deploy](docs/deploy.md)
+- [CEP](docs/cep.md) · [IBGE](docs/ibge.md) · [Feriados](docs/feriados.md) · [CNPJ](docs/cnpj.md)
+- [Arquitetura](docs/architecture.md) · [Decisões (ADRs)](docs/adr/)
 - [Progresso](PROGRESS.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md)
 
 ## Contribuindo
 
-Contribuições são bem-vindas! Leia o [CONTRIBUTING.md](CONTRIBUTING.md) e o
-[Código de Conduta](CODE_OF_CONDUCT.md). Para vulnerabilidades, veja [SECURITY.md](SECURITY.md).
+Issues e pull requests são bem-vindos. Leia o [CONTRIBUTING](CONTRIBUTING.md): toda
+integração cita a documentação oficial e vem com testes contra respostas reais.
+Vulnerabilidades: [SECURITY](SECURITY.md).
 
-## Licença
+---
 
-[MIT](LICENSE) © Efer Eder
+<div align="center">
+
+[MIT](LICENSE) © Efer Eder · feito em [efer.online](https://efer.online)
+
+</div>
