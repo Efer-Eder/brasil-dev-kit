@@ -26,3 +26,7 @@ projeto adota o [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 - Testes de integração opcionais (`pnpm test:integration`) e workflow semanal.
 - UFs e municípios pela API de Localidades do IBGE (`createIbgeClient`, com
   `listUfs` e `listMunicipios`), além de `resolveUf` e `UF_CODES`.
+- API HTTP pública (`server/`) publicada em `https://efer.online/api/brasil-dev-kit/`:
+  CEP, UFs, municípios e validação de CNPJ, com cache em memória, junção de
+  consultas simultâneas, limites por provedor externo, timeouts encadeados e
+  limite de 10 req/s por IP no Nginx. Deploy via Docker (`deploy/`).

@@ -1,5 +1,44 @@
 # Progresso
 
+## 2026-11-20 — Etapa 4: API pública em efer.online
+
+**Status:** publicada e validada em `https://efer.online/api/brasil-dev-kit/`
+(em desenvolvimento, sem SLA).
+
+### Feito
+
+- `server/`: API HTTP sem dependências (`node:http`) usando a própria biblioteca.
+  Rotas `/v1/cep/{cep}`, `/v1/ibge/ufs`, `/v1/ibge/ufs/{uf}/municipios`,
+  `/v1/cnpj/{cnpj}` e `/v1/health`. Cache TTL+LRU, junção de consultas
+  simultâneas, porteiro por provedor (ritmo, concorrência e fila), limite de
+  requisições simultâneas e erros JSON padronizados.
+- `deploy/`: Dockerfile (node 24 alpine por digest, usuário sem privilégio),
+  Compose com limites (0,5 vCPU, 256 MB, 64 pids, disco só leitura), Nginx com
+  IP real via faixas oficiais do Cloudflare e 10 req/s por IP (rajada 30),
+  `remote-install.sh` com backup/rollback e `deploy.ps1`.
+- Documentação: `docs/api.md` (rotas, erros, cache e as contas de capacidade) e
+  `docs/deploy.md` (publicar, reverter, operar).
+
+### Verificação
+
+- `pnpm run check`: 156 testes (25 novos do servidor), lint, typecheck e build OK.
+- Na VPS (loopback, 0,5 vCPU): ~880 req/s com cache quente, p50 6 ms, sem erros;
+  memória estável em ~83 MB.
+- Público: todas as rotas responderam como esperado; 120 requisições em rajada de
+  um IP → 72 × 200 e 48 × 429 (JSON com `Retry-After`); outro IP seguiu com 200.
+- As 11 rotas públicas dos outros projetos da VPS responderam igual antes e depois.
+
+### Incidente durante o deploy (corrigido)
+
+A primeira tentativa de instalar a rota falhou num `sed` (barras no caminho) e
+parou antes de alterar o site; nada foi recarregado. O script passou a usar
+`awk` e a restaurar automaticamente em qualquer erro.
+
+### Próximo passo objetivo
+
+**Feriados nacionais** na biblioteca e na API, com fonte verificada e distinção
+entre feriados oficiais e pontos facultativos.
+
 ## 2026-11-20 — Etapa 3: UFs e municípios (IBGE)
 
 **Status:** implementado (IBGE). Feriados ainda não existem.

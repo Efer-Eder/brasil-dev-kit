@@ -25,6 +25,19 @@ clear data provenance.
 | National holidays                                           | 🗓️ planned                |
 | Retries with backoff and in-memory cache                    | 🗓️ planned                |
 
+## Public API (nothing to install)
+
+The same features are available over HTTP at
+**`https://efer.online/api/brasil-dev-kit/`** — free, cached, limited to 10
+requests/s per IP, with no availability guarantee. Details (in Portuguese):
+[docs/api.md](docs/api.md).
+
+```powershell
+curl https://efer.online/api/brasil-dev-kit/v1/cep/01310-100
+curl https://efer.online/api/brasil-dev-kit/v1/ibge/ufs/SP/municipios
+curl https://efer.online/api/brasil-dev-kit/v1/cnpj/12ABC34501DE35
+```
+
 ## CEP lookup
 
 CEP is the Brazilian postal code. Lookups use ViaCEP and fall back to BrasilAPI

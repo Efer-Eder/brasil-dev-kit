@@ -24,6 +24,19 @@ SDK **TypeScript-first** para consumir e padronizar dados públicos brasileiros
 | Feriados nacionais                                                    | 🗓️ planejado              |
 | Retries com backoff e cache em memória                                | 🗓️ planejado              |
 
+## API pública (sem instalar nada)
+
+Os mesmos recursos estão disponíveis por HTTP em
+**`https://efer.online/api/brasil-dev-kit/`** — gratuita, com cache e limite de
+10 requisições/s por IP, sem garantia de disponibilidade. Detalhes, erros e as
+contas de capacidade em [docs/api.md](docs/api.md).
+
+```powershell
+curl https://efer.online/api/brasil-dev-kit/v1/cep/01310-100
+curl https://efer.online/api/brasil-dev-kit/v1/ibge/ufs/SP/municipios
+curl https://efer.online/api/brasil-dev-kit/v1/cnpj/12ABC34501DE35
+```
+
 ## Consulta de CEP
 
 Usa o ViaCEP e, se ele estiver indisponível, o BrasilAPI. O resultado é
@@ -130,6 +143,8 @@ Scripts disponíveis: `build`, `lint`, `lint:fix`, `typecheck`, `test`,
 - [Regras de CNPJ e fontes oficiais](docs/cnpj.md)
 - [Consulta de CEP: provedores, fallback e limites](docs/cep.md)
 - [UFs e municípios (IBGE)](docs/ibge.md)
+- [API pública: rotas, erros e capacidade](docs/api.md)
+- [Deploy da API](docs/deploy.md)
 - [Decisões técnicas (ADRs)](docs/adr/)
 - [Progresso](PROGRESS.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md)
 

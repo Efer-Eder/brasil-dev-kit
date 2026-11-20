@@ -14,6 +14,7 @@ verificação das fontes oficiais.
 - [x] IBGE: UFs e municípios pela API oficial de localidades
 - [ ] Feriados nacionais: provedor verificado ou dataset próprio com
       origem/licença, distinguindo feriados oficiais de pontos facultativos
+- [x] API HTTP pública em efer.online (CEP, IBGE, CNPJ) com cache e limites
 - [ ] Fachada `createBrasilDevKit()` reunindo os módulos
 - [x] Testes de integração opcionais contra fontes reais (fora do CI obrigatório) — CEP
 - [x] Testes de integração para IBGE

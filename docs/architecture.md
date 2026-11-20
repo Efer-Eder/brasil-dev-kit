@@ -9,6 +9,8 @@ src/
   providers/   # clientes por fonte de dados: viacep, brasilapi (CEP), ibge
   modules/     # API pública por domínio: cnpj, cep, ibge (prontos); feriados (planejado)
   index.ts     # ponto de entrada público
+server/src/    # API HTTP pública (usa a biblioteca; sem dependências)
+deploy/        # Docker, Nginx e scripts de deploy para efer.online
 tests/
   unit/        # testes sem rede (fetch falso e fixtures)
   integration/ # testes opcionais contra fontes reais (não bloqueiam o CI)
