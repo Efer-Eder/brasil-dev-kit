@@ -30,3 +30,6 @@ projeto adota o [Versionamento Semântico](https://semver.org/lang/pt-BR/).
   CEP, UFs, municípios e validação de CNPJ, com cache em memória, junção de
   consultas simultâneas, limites por provedor externo, timeouts encadeados e
   limite de 10 req/s por IP no Nginx. Deploy via Docker (`deploy/`).
+- Feriados nacionais (`getFeriadosNacionais`, `isFeriadoNacional`, `buscarDataNacional`,
+  `calcularPascoa`): leis federais e portarias federais de 2025 e 2026 com
+  pontos facultativos; rota `/v1/feriados/{ano}` na API.

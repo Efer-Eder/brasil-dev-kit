@@ -1,5 +1,32 @@
 # Progresso
 
+## 2026-11-20 — Etapa 5: feriados nacionais
+
+**Status:** implementado (biblioteca e API).
+
+### Feito
+
+- Fontes conferidas: Leis nº 662/1949 (red. 10.607/2002), 6.802/1980, 14.759/2023 e
+  9.093/1995 no Planalto; Portarias MGI nº 9.783/2024 (calendário 2025) e
+  nº 11.460/2025 (calendário 2026) na divulgação oficial do gov.br.
+- `src/modules/feriados`: calendário por portaria (2025, 2026) ou por lei (2024 e
+  2027–2099, com aviso), Páscoa pelo algoritmo de Meeus, `isFeriadoNacional` e
+  `buscarDataNacional`. Rota `GET /v1/feriados/{ano}` na API.
+- Testes cruzam lei × portaria × Páscoa calculada; `docs/feriados.md`;
+  `examples/node/feriados.mjs`.
+
+### Decisões
+
+- Paixão de Cristo segue a portaria (feriado nacional) e explica em `observacao`
+  que a Lei nº 9.093/1995 a trata como feriado religioso municipal.
+- Pontos facultativos só entram com portaria publicada e conferida; nada é
+  projetado para anos sem portaria.
+
+### Próximo passo objetivo
+
+Página do projeto em efer.online e, depois, retries/cache na biblioteca e a
+fachada `createBrasilDevKit()`.
+
 ## 2026-11-20 — Etapa 4: API pública em efer.online
 
 **Status:** publicada e validada em `https://efer.online/api/brasil-dev-kit/`

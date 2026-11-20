@@ -12,13 +12,13 @@ verificação das fontes oficiais.
 - [x] CEP: ViaCEP + BrasilAPI com fallback, fixtures gravadas e normalização
       do endereço
 - [x] IBGE: UFs e municípios pela API oficial de localidades
-- [ ] Feriados nacionais: provedor verificado ou dataset próprio com
-      origem/licença, distinguindo feriados oficiais de pontos facultativos
+- [x] Feriados nacionais: leis federais + portarias federais 2025/2026,
+      distinguindo feriados de pontos facultativos
 - [x] API HTTP pública em efer.online (CEP, IBGE, CNPJ) com cache e limites
 - [ ] Fachada `createBrasilDevKit()` reunindo os módulos
 - [x] Testes de integração opcionais contra fontes reais (fora do CI obrigatório) — CEP
 - [x] Testes de integração para IBGE
-- [ ] Testes de integração para feriados
+- [ ] Incluir a portaria de 2027 quando for publicada
 - [ ] Exemplos Node.js e demo web mínima (CEP, municípios, feriados)
 - [ ] Definir nome do pacote no npm e configurar changesets
 - [ ] Critérios de aceite da v0.1.0 cumpridos antes de qualquer publicação

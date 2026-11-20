@@ -21,7 +21,7 @@ SDK **TypeScript-first** para consumir e padronizar dados públicos brasileiros
 | Validação de CNPJ numérico e **alfanumérico** (dígitos verificadores) | ✅ implementado e testado |
 | Consulta de CEP (ViaCEP e BrasilAPI, com fallback)                    | ✅ implementado e testado |
 | UFs e municípios (API de Localidades do IBGE)                         | ✅ implementado e testado |
-| Feriados nacionais                                                    | 🗓️ planejado              |
+| Feriados nacionais e pontos facultativos federais (leis + portarias)  | ✅ implementado e testado |
 | Retries com backoff e cache em memória                                | 🗓️ planejado              |
 
 ## API pública (sem instalar nada)
@@ -35,6 +35,7 @@ contas de capacidade em [docs/api.md](docs/api.md).
 curl https://efer.online/api/brasil-dev-kit/v1/cep/01310-100
 curl https://efer.online/api/brasil-dev-kit/v1/ibge/ufs/SP/municipios
 curl https://efer.online/api/brasil-dev-kit/v1/cnpj/12ABC34501DE35
+curl https://efer.online/api/brasil-dev-kit/v1/feriados/2026
 ```
 
 ## Consulta de CEP
@@ -72,6 +73,20 @@ const ufs = await ibge.listUfs(); // 27 UFs com região, ordenadas por nome
 const municipios = await ibge.listMunicipios('RR'); // ou pelo código: 14
 // [{ codigoIbge: '1400050', nome: 'Alto Alegre', uf: 'RR', microrregiao: {…},
 //    mesorregiao: {…}, regiaoImediata: {…}, regiaoIntermediaria: {…} }, …]
+```
+
+## Feriados nacionais
+
+Feriados das leis federais e, quando já publicada e conferida, a portaria anual do
+governo federal com os pontos facultativos (2025 e 2026 hoje). Sem requisições.
+Detalhes e fontes em [docs/feriados.md](docs/feriados.md).
+
+```ts
+import { getFeriadosNacionais, isFeriadoNacional } from 'brasil-dev-kit';
+
+getFeriadosNacionais(2026); // { origem: 'portaria', datas: [19 itens], fontes, avisos }
+isFeriadoNacional('2026-11-20'); // true
+isFeriadoNacional('2026-02-16'); // false (Carnaval é ponto facultativo)
 ```
 
 ## Validação de CNPJ
@@ -131,6 +146,7 @@ pnpm build
 node examples/node/cnpj.mjs
 node examples/node/cep.mjs 01310-100
 node examples/node/ibge.mjs RR
+node examples/node/feriados.mjs 2026
 ```
 
 Sem instalar o pnpm globalmente, troque `pnpm` por `npx pnpm@12.21.0`.
@@ -143,6 +159,7 @@ Scripts disponíveis: `build`, `lint`, `lint:fix`, `typecheck`, `test`,
 - [Regras de CNPJ e fontes oficiais](docs/cnpj.md)
 - [Consulta de CEP: provedores, fallback e limites](docs/cep.md)
 - [UFs e municípios (IBGE)](docs/ibge.md)
+- [Feriados nacionais: fontes e regras](docs/feriados.md)
 - [API pública: rotas, erros e capacidade](docs/api.md)
 - [Deploy da API](docs/deploy.md)
 - [Decisões técnicas (ADRs)](docs/adr/)

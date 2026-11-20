@@ -13,6 +13,7 @@ Base: **`https://efer.online/api/brasil-dev-kit/`**
 | GET    | `/v1/ibge/ufs`                 | 27 UFs com região, ordenadas por nome                       |
 | GET    | `/v1/ibge/ufs/{uf}/municipios` | Municípios da UF (sigla `SP` ou código `35`), por nome      |
 | GET    | `/v1/cnpj/{cnpj}`              | Validação de formato e dígitos verificadores (sem consulta) |
+| GET    | `/v1/feriados/{ano}`           | Feriados nacionais e pontos facultativos federais do ano    |
 
 Exemplos:
 
@@ -20,6 +21,7 @@ Exemplos:
 curl https://efer.online/api/brasil-dev-kit/v1/cep/01310-100
 curl https://efer.online/api/brasil-dev-kit/v1/ibge/ufs/RR/municipios
 curl https://efer.online/api/brasil-dev-kit/v1/cnpj/12ABC34501DE35
+curl https://efer.online/api/brasil-dev-kit/v1/feriados/2026
 ```
 
 ```ts

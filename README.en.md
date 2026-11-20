@@ -16,14 +16,14 @@ clear data provenance.
 
 ## What works today
 
-| Feature                                                     | Status                    |
-| ----------------------------------------------------------- | ------------------------- |
-| HTTP client with timeout, `AbortSignal` and typed errors    | ✅ implemented and tested |
-| Numeric and **alphanumeric** CNPJ validation (check digits) | ✅ implemented and tested |
-| CEP lookup (ViaCEP and BrasilAPI, with fallback)            | ✅ implemented and tested |
-| States and municipalities (IBGE Localidades API)            | ✅ implemented and tested |
-| National holidays                                           | 🗓️ planned                |
-| Retries with backoff and in-memory cache                    | 🗓️ planned                |
+| Feature                                                      | Status                    |
+| ------------------------------------------------------------ | ------------------------- |
+| HTTP client with timeout, `AbortSignal` and typed errors     | ✅ implemented and tested |
+| Numeric and **alphanumeric** CNPJ validation (check digits)  | ✅ implemented and tested |
+| CEP lookup (ViaCEP and BrasilAPI, with fallback)             | ✅ implemented and tested |
+| States and municipalities (IBGE Localidades API)             | ✅ implemented and tested |
+| National holidays and federal optional days (laws + decrees) | ✅ implemented and tested |
+| Retries with backoff and in-memory cache                     | 🗓️ planned                |
 
 ## Public API (nothing to install)
 
@@ -36,6 +36,7 @@ requests/s per IP, with no availability guarantee. Details (in Portuguese):
 curl https://efer.online/api/brasil-dev-kit/v1/cep/01310-100
 curl https://efer.online/api/brasil-dev-kit/v1/ibge/ufs/SP/municipios
 curl https://efer.online/api/brasil-dev-kit/v1/cnpj/12ABC34501DE35
+curl https://efer.online/api/brasil-dev-kit/v1/feriados/2026
 ```
 
 ## CEP lookup
@@ -70,6 +71,19 @@ import { createIbgeClient } from 'brasil-dev-kit';
 const ibge = createIbgeClient();
 const ufs = await ibge.listUfs(); // 27 states with region, sorted by name
 const municipios = await ibge.listMunicipios('RR'); // or by code: 14
+```
+
+## National holidays
+
+Holidays from federal law and, when published and checked, the yearly federal
+government decree (portaria) with optional days off (2025 and 2026 today). No
+network calls. Details (in Portuguese): [docs/feriados.md](docs/feriados.md).
+
+```ts
+import { getFeriadosNacionais, isFeriadoNacional } from 'brasil-dev-kit';
+
+getFeriadosNacionais(2026); // { origem: 'portaria', datas: [19 items], fontes, avisos }
+isFeriadoNacional('2026-11-20'); // true
 ```
 
 ## CNPJ validation
@@ -121,6 +135,7 @@ pnpm build
 node examples/node/cnpj.mjs
 node examples/node/cep.mjs 01310-100
 node examples/node/ibge.mjs RR
+node examples/node/feriados.mjs 2026
 ```
 
 Without a global pnpm, replace `pnpm` with `npx pnpm@12.21.0`.
