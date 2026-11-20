@@ -14,6 +14,7 @@ Base: **`https://efer.online/api/brasil-dev-kit/`**
 | GET    | `/v1/ibge/ufs/{uf}/municipios` | Municípios da UF (sigla `SP` ou código `35`), por nome      |
 | GET    | `/v1/cnpj/{cnpj}`              | Validação de formato e dígitos verificadores (sem consulta) |
 | GET    | `/v1/feriados/{ano}`           | Feriados nacionais e pontos facultativos federais do ano    |
+| GET    | `/v1/projeto/github`           | Resumo do repositório (estrelas, issues, PRs, commits, CI)  |
 
 Exemplos:
 
