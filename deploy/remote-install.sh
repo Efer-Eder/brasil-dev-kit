@@ -60,15 +60,26 @@ if [ "$WITH_NGINX" = "--nginx" ]; then
     nginx -t
   }
 
+  # Qualquer erro daqui em diante desfaz a mudança do Nginx.
+  trap 'restore; exit 1' ERR
+
   echo "==> Nginx: instalando configuração"
   install -m 644 "$STAGE/brasil-dev-kit-http.conf" "$HTTP_CONF"
   install -m 644 "$STAGE/brasil-dev-kit-location.conf" "$SNIPPET"
   if ! grep -qF 'snippets/brasil-dev-kit.conf' "$SITE"; then
     # Inclui logo após o primeiro `server_name efer.online` (server block principal).
-    sed -i '0,/^\s*server_name efer.online/s//&\n'"$INCLUDE_LINE"'/' "$SITE"
+    # Reescreve com `cat >` para manter dono, permissões e o symlink de sites-enabled.
+    tmp="$(mktemp)"
+    awk -v line="$INCLUDE_LINE" '
+      { print }
+      !done && index($0, "server_name efer.online") { print line; done = 1 }
+    ' "$SITE" > "$tmp"
+    cat "$tmp" > "$SITE"
+    rm -f "$tmp"
     grep -qF 'snippets/brasil-dev-kit.conf' "$SITE" || { echo "ERRO: não achei onde incluir o snippet" >&2; restore; exit 1; }
   fi
 
+  trap - ERR
   if nginx -t; then
     systemctl reload nginx
     echo "Nginx recarregado"
