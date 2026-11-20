@@ -5,12 +5,15 @@ Obrigado pelo interesse! Este guia explica como preparar o ambiente e enviar mud
 ## Ambiente
 
 - Node.js ≥ 22.12 e Git.
-- pnpm na versão fixada em `package.json` (`packageManager`). Sem instalação
-  global, use `npx pnpm@10.34.9 <comando>`; com `corepack enable`, use `pnpm`.
+- pnpm 12, na versão fixada em `package.json` (`packageManager`). Sem
+  instalação global, use `npx pnpm@12.21.0 <comando>`.
+- O pnpm 12 recusa pacotes publicados há menos de 1 dia (`minimumReleaseAge`)
+  e só roda scripts de instalação aprovados em `pnpm-workspace.yaml`
+  (`allowBuilds`). Não desative essas proteções sem discutir em uma issue.
 
 ```powershell
-npx pnpm@10.34.9 install
-npx pnpm@10.34.9 run check   # lint + typecheck + testes + build
+pnpm install
+pnpm run check   # lint + typecheck + testes + build
 ```
 
 ## Fluxo

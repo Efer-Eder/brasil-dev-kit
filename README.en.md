@@ -60,17 +60,19 @@ Errors: `ValidationError`, `NotFoundError`, `RateLimitError` (with `retryAfterMs
 
 ## Running locally (Windows, macOS or Linux)
 
-Requires **Node.js ≥ 22.12** and Git. pnpm is pinned in `packageManager`; no
-global install needed — `npx` fetches the right version.
+Requires **Node.js ≥ 22.12**, Git and **pnpm 12** (pinned in `packageManager`;
+install with `npm install -g pnpm@12.21.0`).
 
 ```powershell
 git clone https://github.com/Efer-Eder/brasil-dev-kit.git
 cd brasil-dev-kit
-npx pnpm@10.34.9 install
-npx pnpm@10.34.9 test
-npx pnpm@10.34.9 build
+pnpm install
+pnpm test
+pnpm build
 node examples/node/cnpj.mjs
 ```
+
+Without a global pnpm, replace `pnpm` with `npx pnpm@12.21.0`.
 
 ## Contributing
 

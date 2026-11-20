@@ -67,21 +67,21 @@ todos com `code` estável e herdando de `BrasilDevKitError`.
 
 ## Rodando localmente (Windows, macOS ou Linux)
 
-Requisitos: **Node.js ≥ 22.12** e Git. O projeto usa pnpm (versão fixada em
-`packageManager`); não é preciso instalá-lo globalmente — `npx` baixa a versão certa.
+Requisitos: **Node.js ≥ 22.12**, Git e **pnpm 12** (versão fixada em
+`packageManager`; instale com `npm install -g pnpm@12.21.0`).
 
 ```powershell
 git clone https://github.com/Efer-Eder/brasil-dev-kit.git
 cd brasil-dev-kit
-npx pnpm@10.34.9 install
-npx pnpm@10.34.9 test
-npx pnpm@10.34.9 build
+pnpm install
+pnpm test
+pnpm build
 node examples/node/cnpj.mjs
 ```
 
-Se você já tem o pnpm (por exemplo via `corepack enable`), use `pnpm install`,
-`pnpm test` etc. Scripts disponíveis: `build`, `lint`, `lint:fix`, `typecheck`,
-`test`, `check` (roda tudo).
+Sem instalar o pnpm globalmente, troque `pnpm` por `npx pnpm@12.21.0`.
+Scripts disponíveis: `build`, `lint`, `lint:fix`, `typecheck`, `test`,
+`check` (roda tudo).
 
 ## Documentação
 

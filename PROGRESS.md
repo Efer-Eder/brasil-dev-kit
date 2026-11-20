@@ -11,7 +11,11 @@
 - Tooling: TypeScript 5.9 strict (`noUncheckedIndexedAccess`,
   `exactOptionalPropertyTypes`), tsup (ESM + CJS + `.d.ts`), Vitest, Biome
   (ver [ADR 0001](docs/adr/0001-biome-para-lint-e-formatacao.md)).
-  `packageManager: pnpm@10.34.9`, usado via `npx` (sem instalação global).
+  `packageManager: pnpm@12.21.0` (inicialmente 10.34.9 via `npx`; atualizado
+  quando o pnpm 12 foi instalado globalmente na máquina do mantenedor).
+  O pnpm 12 aplica `minimumReleaseAge` (1 dia): o lockfile foi refeito e o
+  `cac` ficou em 7.1.0, pois a 7.1.1 tinha sido publicada no mesmo dia.
+  Scripts de instalação permitidos: só `esbuild` (`pnpm-workspace.yaml`).
 - `src/core/errors.ts`: erros tipados com `code` estável e `provider`.
 - `src/core/http.ts`: `createHttpClient().getJson()` com timeout próprio +
   `AbortSignal` do chamador, query string, cabeçalhos, `User-Agent` opcional,
