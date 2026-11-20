@@ -1,5 +1,15 @@
 # Progresso
 
+## 2026-11-20 — Etapa 7: README novo e GIFs
+
+- README pt-BR e en-US redesenhados: banner animado, badges (CI, status da API,
+  licença, TypeScript, Node, estrelas), navegação, demos em GIF, tabela de
+  módulos com a fonte de cada dado, API, erros tipados e como rodar.
+- GIFs (banner, terminal e SDK, um por idioma) gerados por
+  `scripts/readme-gifs/make_gifs.py` (Pillow + ffmpeg) com saídas reais da API e
+  do SDK; 548 KB no total. Conferidos renderizando no GitHub.
+- Site do repositório no GitHub aponta para a página do projeto.
+
 ## 2026-11-20 — Etapa 6: página do projeto em efer.online
 
 **Status:** publicada em https://efer.online/projeto/brasil-dev-kit/.
