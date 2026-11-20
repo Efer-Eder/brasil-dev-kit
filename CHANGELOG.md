@@ -19,3 +19,8 @@ projeto adota o [Versionamento Semântico](https://semver.org/lang/pt-BR/).
   `formatCnpj`, `normalizeCnpj`, `computeCnpjCheckDigits`) conforme o manual
   oficial de cálculo do DV.
 - CI no GitHub Actions (Windows e Ubuntu) e varredura de segredos.
+- Consulta de CEP (`createCepClient().lookup`) com os provedores ViaCEP e
+  BrasilAPI, fallback por indisponibilidade, `fallbackOnNotFound` opcional,
+  endereço normalizado com procedência (`fonte`) e utilitários de formato
+  (`isValidCepFormat`, `normalizeCep`, `formatCep`, `assertCep`).
+- Testes de integração opcionais (`pnpm test:integration`) e workflow semanal.

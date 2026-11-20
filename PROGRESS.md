@@ -1,5 +1,46 @@
 # Progresso
 
+## 2026-11-20 — Etapa 2: consulta de CEP
+
+**Status:** implementado (CEP); IBGE e feriados ainda não existem.
+
+### Feito
+
+- Contratos verificados: ViaCEP pela documentação em <https://viacep.com.br/>;
+  BrasilAPI pela especificação OpenAPI no repositório oficial (MIT). Respostas
+  reais gravadas em `tests/fixtures/cep/` (200, não encontrado e 400 de cada).
+- `src/providers/viacep.ts` e `src/providers/brasilapi.ts`: validação manual do
+  formato da resposta (sem dependências) e conversão para `Endereco`.
+- `src/modules/cep`: `createCepClient().lookup()` com fallback por
+  indisponibilidade, `fallbackOnNotFound` opcional, cancelamento, erros
+  agregados; utilitários de formato que não fazem requisições.
+- Testes de integração opcionais (`pnpm test:integration`, 4 testes contra as
+  APIs reais, passando) e workflow semanal/manual separado do CI obrigatório.
+- Exemplo `examples/node/cep.mjs` e documentação em `docs/cep.md`.
+
+### Verificação local
+
+- `pnpm run check` — lint, typecheck, 107 testes unitários e build OK.
+- `pnpm test:integration` — 4 testes OK contra ViaCEP e BrasilAPI.
+- `node examples/node/cep.mjs 01310-100` — endereço real retornado pelo ViaCEP.
+
+### Decisões
+
+- Ordem padrão `viacep` → `brasilapi`: o ViaCEP tem documentação pública
+  direta e devolve `complemento`; o BrasilAPI já agrega fontes e serve de reserva.
+- "Não encontrado" não gera fallback por padrão (evita requisições extras);
+  as bases divergem, então `fallbackOnNotFound` existe como opção.
+- Fixtures gravadas ficam fora do Biome e com `-text` no `.gitattributes`,
+  para que formatador e Git não alterem os bytes recebidos.
+- Campos do `Endereco` em português, alinhados ao domínio.
+
+### Próximo passo objetivo
+
+Módulo **IBGE**: ler a documentação oficial da API de Localidades
+(`servicodados.ibge.gov.br`), gravar fixtures de UFs e municípios de uma UF,
+implementar `listUfs()` e `listMunicipios({ uf })` com validação de resposta e
+testes de contrato.
+
 ## 2026-11-20 — Etapa 1: fundação
 
 **Status:** parcial (fundação pronta; adaptadores de dados ainda não existem).
