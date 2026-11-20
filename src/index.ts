@@ -20,6 +20,19 @@ export {
   type RequestOptions,
 } from './core/http.js';
 export {
+  assertCep,
+  type CepClient,
+  type CepClientOptions,
+  type CepLookupOptions,
+  type CepProviderId,
+  createCepClient,
+  DEFAULT_CEP_PROVIDERS,
+  type Endereco,
+  formatCep,
+  isValidCepFormat,
+  normalizeCep,
+} from './modules/cep/index.js';
+export {
   type CnpjInvalidReason,
   type CnpjValidationResult,
   computeCnpjCheckDigits,
