@@ -5,6 +5,13 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    ignore:
+      # TypeScript 7 ainda não é usado: o build de tipos do tsup depende da API JS do compilador.
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
+      # @types/node acompanha a menor versão de Node suportada (engines), não a mais recente.
+      - dependency-name: '@types/node'
+        update-types: [version-update:semver-major]
   - package-ecosystem: github-actions
     directory: /
     schedule:
