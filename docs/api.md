@@ -61,6 +61,14 @@ Sempre JSON no formato `{ "erro": { "codigo": "...", "mensagem": "..." } }`.
 - Erros de provedor **não** são cacheados.
 - Pedidos simultâneos do mesmo CEP viram uma única consulta externa.
 
+## Resumo do GitHub (`/v1/projeto/github`)
+
+Alimenta o widget da [página do projeto](https://efer.online/projeto/brasil-dev-kit/).
+Consulta a API pública do GitHub sem token (60 req/h por IP): cada atualização faz
+5 chamadas e o resultado fica 10 minutos em cache (30 chamadas/h no máximo). Se o
+GitHub falhar, a API devolve o último resumo bom com `desatualizado: true` e
+`X-Cache: STALE`. A lista de issues do GitHub inclui PRs; aqui eles vêm separados.
+
 ## Procedência e privacidade
 
 - CEP: ViaCEP e, em falha, BrasilAPI (ver [cep.md](cep.md)). UFs/municípios:

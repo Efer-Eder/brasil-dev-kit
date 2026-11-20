@@ -8,6 +8,8 @@
 SDK **TypeScript-first** para consumir e padronizar dados públicos brasileiros
 (CEP, IBGE, feriados, CNPJ) com API tipada, erros previsíveis e procedência clara.
 
+🌐 **Página do projeto, com playground da API:** https://efer.online/projeto/brasil-dev-kit/
+
 > ⚠️ **Em desenvolvimento.** Ainda não há versão publicada no npm. Esta página
 > mostra apenas o que já existe no código; o restante está no [ROADMAP](ROADMAP.md).
 > Os `import` abaixo usam o nome provisório `brasil-dev-kit`; o nome final do

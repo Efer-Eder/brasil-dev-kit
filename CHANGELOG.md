@@ -33,3 +33,6 @@ projeto adota o [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 - Feriados nacionais (`getFeriadosNacionais`, `isFeriadoNacional`, `buscarDataNacional`,
   `calcularPascoa`): leis federais e portarias federais de 2025 e 2026 com
   pontos facultativos; rota `/v1/feriados/{ano}` na API.
+- Página do projeto em `https://efer.online/projeto/brasil-dev-kit/` (`site/`), com
+  playground da API e widget do GitHub alimentado pela rota `/v1/projeto/github`
+  (cache de 10 minutos, fallback para o último dado bom).

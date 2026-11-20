@@ -1,5 +1,31 @@
 # Progresso
 
+## 2026-11-20 — Etapa 6: página do projeto em efer.online
+
+**Status:** publicada em https://efer.online/projeto/brasil-dev-kit/.
+
+### Feito
+
+- `site/index.html`: página no design system do efer.online (Studio Graphite),
+  com o mascote Ponto, playground ao vivo da API (CEP, municípios, feriados,
+  CNPJ), fontes de cada dado, limites medidos, estado do projeto e FAQ.
+- Widget do GitHub (estrelas, forks, issues, PRs, commits, contribuidores, CI e
+  últimos commits) via `GET /v1/projeto/github`: a API consulta o GitHub com
+  cache de 10 minutos, então a página se atualiza sozinha, sem deploy.
+- Nginx: `/projeto/brasil-dev-kit/` servido de `/var/www/brasil-dev-kit/`
+  pelo snippet do projeto; deploy instala a página com backup.
+
+### Verificação
+
+- 198 testes; lint (inclusive acessibilidade do HTML) sem avisos.
+- Preview local em 1440 px e 375 px sem rolagem horizontal; público com console
+  limpo, playground 200 e widget refletindo o push mais recente.
+- Rotas dos outros projetos da VPS iguais antes e depois.
+
+### Próximo passo objetivo
+
+Retries com backoff e cache na biblioteca; depois a fachada `createBrasilDevKit()`.
+
 ## 2026-11-20 — Etapa 5: feriados nacionais
 
 **Status:** implementado (biblioteca e API).

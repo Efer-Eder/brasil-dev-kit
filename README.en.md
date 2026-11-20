@@ -9,6 +9,8 @@ A **TypeScript-first** SDK to consume and normalize Brazilian public data
 (postal codes/CEP, IBGE, holidays, CNPJ) with a typed API, predictable errors and
 clear data provenance.
 
+🌐 **Project page with a live API playground:** https://efer.online/projeto/brasil-dev-kit/
+
 > ⚠️ **Work in progress.** Nothing is published on npm yet. This page only shows
 > what already exists in the code; everything else is in the [ROADMAP](ROADMAP.md).
 > The imports below use the provisional name `brasil-dev-kit`; the final npm
