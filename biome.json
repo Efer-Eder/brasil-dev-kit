@@ -7,7 +7,12 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["**", "!**/tests/fixtures/cep/viacep", "!**/tests/fixtures/cep/brasilapi"]
+    "includes": [
+      "**",
+      "!**/tests/fixtures/cep/viacep",
+      "!**/tests/fixtures/cep/brasilapi",
+      "!**/tests/fixtures/ibge/api"
+    ]
   },
   "formatter": {
     "enabled": true,
