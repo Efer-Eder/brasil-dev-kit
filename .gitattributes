@@ -1,1 +1,4 @@
 * text=auto eol=lf
+# Respostas gravadas de provedores: manter os bytes exatamente como recebidos.
+tests/fixtures/cep/viacep/** -text
+tests/fixtures/cep/brasilapi/** -text
