@@ -8,6 +8,7 @@ src/
   core/        # cliente HTTP: timeout, retries com backoff, cache TTL e erros tipados
   providers/   # clientes por fonte de dados: viacep, brasilapi (CEP), ibge
   modules/     # API pública por domínio: cnpj, cep, ibge (prontos); feriados (planejado)
+  kit.ts       # fachada createBrasilDevKit(): todos os módulos com opções comuns
   index.ts     # ponto de entrada público
 server/src/    # API HTTP pública (usa a biblioteca; sem dependências)
 deploy/        # Docker, Nginx e scripts de deploy para efer.online

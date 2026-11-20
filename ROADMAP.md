@@ -15,7 +15,7 @@ verificação das fontes oficiais.
 - [x] Feriados nacionais: leis federais + portarias federais 2025/2026,
       distinguindo feriados de pontos facultativos
 - [x] API HTTP pública em efer.online (CEP, IBGE, CNPJ) com cache e limites
-- [ ] Fachada `createBrasilDevKit()` reunindo os módulos
+- [x] Fachada `createBrasilDevKit()` reunindo os módulos
 - [x] Testes de integração opcionais contra fontes reais (fora do CI obrigatório) — CEP
 - [x] Testes de integração para IBGE
 - [ ] Incluir a portaria de 2027 quando for publicada
