@@ -143,7 +143,7 @@ describe('createHttpClient().getJson', () => {
 
   it('lança TimeoutError quando o tempo limite expira', async () => {
     vi.useFakeTimers();
-    const client = createHttpClient({ fetch: hangingFetch, timeoutMs: 1000 });
+    const client = createHttpClient({ fetch: hangingFetch, timeoutMs: 1000, retry: false });
     const assertion = expect(
       client.getJson('https://api.example.test/lento'),
     ).rejects.toMatchObject({ name: 'TimeoutError', code: 'TIMEOUT', timeoutMs: 1000 });
@@ -153,7 +153,7 @@ describe('createHttpClient().getJson', () => {
 
   it('permite sobrescrever o timeout por requisição', async () => {
     vi.useFakeTimers();
-    const client = createHttpClient({ fetch: hangingFetch, timeoutMs: 60_000 });
+    const client = createHttpClient({ fetch: hangingFetch, timeoutMs: 60_000, retry: false });
     const promise = client.getJson('https://api.example.test/lento', { timeoutMs: 50 });
     const assertion = expect(promise).rejects.toBeInstanceOf(TimeoutError);
     await vi.advanceTimersByTimeAsync(50);

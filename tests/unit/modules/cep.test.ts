@@ -273,9 +273,12 @@ describe('fallback entre provedores', () => {
       new Promise((_resolve, reject) => {
         init.signal?.addEventListener('abort', () => reject(init.signal?.reason), { once: true });
       });
-    const promise = createCepClient({ fetch, providers: ['viacep'], timeoutMs: 500 }).lookup(
-      '01310100',
-    );
+    const promise = createCepClient({
+      fetch,
+      providers: ['viacep'],
+      timeoutMs: 500,
+      retry: false,
+    }).lookup('01310100');
     const assertion = expect(promise).rejects.toBeInstanceOf(TimeoutError);
     await vi.advanceTimersByTimeAsync(500);
     await assertion;
