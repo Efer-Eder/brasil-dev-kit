@@ -1,0 +1,66 @@
+{
+  "name": "brasil-dev-kit",
+  "version": "0.0.0",
+  "private": true,
+  "description": "SDK TypeScript para dados públicos brasileiros (em desenvolvimento).",
+  "license": "MIT",
+  "author": "Efer Eder",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Efer-Eder/brasil-dev-kit.git"
+  },
+  "keywords": [
+    "typescript",
+    "brasil",
+    "cep",
+    "ibge",
+    "cnpj",
+    "sdk"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22.12"
+  },
+  "packageManager": "pnpm@10.34.9",
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.8",
+    "@types/node": "24.19.2",
+    "tsup": "9.0.0",
+    "typescript": "5.9.3",
+    "vitest": "5.1.1"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}
