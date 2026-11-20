@@ -4,7 +4,13 @@ import {
   ProviderUnavailableError,
   ValidationError,
 } from '../../core/errors.js';
-import { createHttpClient, type FetchLike, type HttpClient } from '../../core/http.js';
+import {
+  createHttpClient,
+  type FetchLike,
+  type HttpClient,
+  type HttpClientOptions,
+  type RetryOptions,
+} from '../../core/http.js';
 import {
   BRASILAPI_CEP_BASE_URL,
   BRASILAPI_PROVIDER,
@@ -35,6 +41,16 @@ export interface CepClientOptions {
   fetch?: FetchLike;
   /** `User-Agent` opcional (ignorado por navegadores). */
   userAgent?: string;
+  /**
+   * Novas tentativas com backoff exponencial e jitter (ver `RetryOptions`); `false` desliga.
+   * Padrão: sem novas tentativas quando há mais de um provedor (o fallback já é a nova
+   * tentativa, e mais rápida); com um provedor só, o padrão do core (2 tentativas extras).
+   */
+  retry?: RetryOptions | false;
+  /** Liga o cache em memória das respostas, com este tempo de vida (ms). Desligado se omitido. */
+  cacheTtlMs?: number;
+  /** Máximo de respostas em cache. Padrão: 500. */
+  cacheMaxEntries?: number;
 }
 
 export interface CepClient {
@@ -81,6 +97,7 @@ export function createCepClient(options: CepClientOptions = {}): CepClient {
       ...(options.timeoutMs === undefined ? {} : { timeoutMs: options.timeoutMs }),
       ...(options.fetch === undefined ? {} : { fetch: options.fetch }),
       ...(options.userAgent === undefined ? {} : { userAgent: options.userAgent }),
+      ...httpExtras(options, options.retry ?? (providerIds.length > 1 ? false : undefined)),
     });
     return { id, http, lookup: entry.lookup };
   });
@@ -113,5 +130,24 @@ export function createCepClient(options: CepClientOptions = {}): CepClient {
         cause: new AggregateError(errors),
       });
     },
+  };
+}
+
+function httpExtras(
+  options: { cacheTtlMs?: number; cacheMaxEntries?: number },
+  retry: RetryOptions | false | undefined,
+): Pick<HttpClientOptions, 'retry' | 'cache'> {
+  return {
+    ...(retry === undefined ? {} : { retry }),
+    ...(options.cacheTtlMs === undefined
+      ? {}
+      : {
+          cache: {
+            ttlMs: options.cacheTtlMs,
+            ...(options.cacheMaxEntries === undefined
+              ? {}
+              : { maxEntries: options.cacheMaxEntries }),
+          },
+        }),
   };
 }

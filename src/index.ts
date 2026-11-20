@@ -11,13 +11,17 @@ export {
   ValidationError,
 } from './core/errors.js';
 export {
+  type CacheOptions,
   createHttpClient,
+  DEFAULT_RETRY,
   DEFAULT_TIMEOUT_MS,
   type FetchLike,
   type HttpClient,
   type HttpClientOptions,
   type QueryValue,
   type RequestOptions,
+  type RetryOptions,
+  retryDelay,
 } from './core/http.js';
 export {
   assertCep,

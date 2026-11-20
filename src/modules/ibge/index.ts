@@ -1,4 +1,9 @@
-import { createHttpClient, type FetchLike } from '../../core/http.js';
+import {
+  createHttpClient,
+  type FetchLike,
+  type HttpClientOptions,
+  type RetryOptions,
+} from '../../core/http.js';
 import {
   IBGE_LOCALIDADES_BASE_URL,
   IBGE_PROVIDER,
@@ -18,6 +23,15 @@ export interface IbgeClientOptions {
   fetch?: FetchLike;
   /** `User-Agent` opcional (ignorado por navegadores). */
   userAgent?: string;
+  /**
+   * Novas tentativas com backoff exponencial e jitter (ver `RetryOptions`); `false` desliga.
+   * Padrão: 2 tentativas extras (fonte única).
+   */
+  retry?: RetryOptions | false;
+  /** Liga o cache em memória das respostas, com este tempo de vida (ms). Desligado se omitido. */
+  cacheTtlMs?: number;
+  /** Máximo de respostas em cache. Padrão: 500. */
+  cacheMaxEntries?: number;
 }
 
 export interface IbgeClient {
@@ -39,11 +53,31 @@ export function createIbgeClient(options: IbgeClientOptions = {}): IbgeClient {
     ...(options.timeoutMs === undefined ? {} : { timeoutMs: options.timeoutMs }),
     ...(options.fetch === undefined ? {} : { fetch: options.fetch }),
     ...(options.userAgent === undefined ? {} : { userAgent: options.userAgent }),
+    ...httpExtras(options, options.retry),
   });
 
   return {
     listUfs: (requestOptions = {}) => listUfsIbge(http, requestOptions),
     listMunicipios: async (uf, requestOptions = {}) =>
       listMunicipiosIbge(http, resolveUf(uf), requestOptions),
+  };
+}
+
+function httpExtras(
+  options: { cacheTtlMs?: number; cacheMaxEntries?: number },
+  retry: RetryOptions | false | undefined,
+): Pick<HttpClientOptions, 'retry' | 'cache'> {
+  return {
+    ...(retry === undefined ? {} : { retry }),
+    ...(options.cacheTtlMs === undefined
+      ? {}
+      : {
+          cache: {
+            ttlMs: options.cacheTtlMs,
+            ...(options.cacheMaxEntries === undefined
+              ? {}
+              : { maxEntries: options.cacheMaxEntries }),
+          },
+        }),
   };
 }
