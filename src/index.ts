@@ -42,6 +42,20 @@ export {
   validateCnpj,
 } from './modules/cnpj/index.js';
 export {
+  ANO_MAXIMO,
+  ANO_MINIMO,
+  ANOS_COM_PORTARIA,
+  buscarDataNacional,
+  type CalendarioFeriados,
+  calcularPascoa,
+  type DataCalendario,
+  type FonteCalendario,
+  getFeriadosNacionais,
+  isFeriadoNacional,
+  type Periodo,
+  type TipoData,
+} from './modules/feriados/index.js';
+export {
   createIbgeClient,
   type DivisaoIbge,
   type IbgeClient,
