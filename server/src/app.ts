@@ -5,6 +5,7 @@ import {
   createIbgeClient,
   type Endereco,
   type FetchLike,
+  getFeriadosNacionais,
   HttpError,
   type IbgeClient,
   type Municipio,
@@ -163,10 +164,11 @@ export function createApp(deps: AppDeps): App {
           ufs: '/v1/ibge/ufs',
           municipios: '/v1/ibge/ufs/{uf}/municipios',
           cnpj: '/v1/cnpj/{cnpj}',
+          feriados: '/v1/feriados/{ano}',
           saude: '/v1/health',
         },
         aviso:
-          'Serviço gratuito, sem garantia de disponibilidade. Dados de CEP vêm do ViaCEP/BrasilAPI e de UFs/municípios do IBGE, com cache.',
+          'Serviço gratuito, sem garantia de disponibilidade. Dados de CEP vêm do ViaCEP/BrasilAPI, de UFs/municípios do IBGE e de feriados das leis federais e portarias do governo federal, com cache.',
       },
       headers: { 'cache-control': CACHE_HOUR },
     };
@@ -194,6 +196,16 @@ export function createApp(deps: AppDeps): App {
     }
     if (resource === 'cep' && rest.length === 1 && rest[0] !== undefined) {
       return getCep(rest[0]);
+    }
+    if (resource === 'feriados' && rest.length === 1 && rest[0] !== undefined) {
+      if (!/^\d{4}$/.test(rest[0])) {
+        return errorReply(400, 'VALIDATION_ERROR', 'Ano deve ter 4 dígitos (ex.: 2026).');
+      }
+      return {
+        status: 200,
+        body: getFeriadosNacionais(Number(rest[0])),
+        headers: { 'cache-control': CACHE_DAY },
+      };
     }
     if (resource === 'cnpj' && rest.length === 1 && rest[0] !== undefined) {
       const result = validateCnpj(rest[0]);

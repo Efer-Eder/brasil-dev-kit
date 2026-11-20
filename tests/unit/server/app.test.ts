@@ -263,3 +263,29 @@ describe('loadConfig', () => {
     expect(() => loadConfig({ MAX_IN_FLIGHT: '0' })).toThrow(/MAX_IN_FLIGHT/);
   });
 });
+
+describe('API — feriados', () => {
+  it('2026 vem da portaria, sem chamada externa', async () => {
+    const { fetch, calls } = routedFetch({});
+    const { get } = await start(fetch);
+    const res = await get('/v1/feriados/2026');
+    expect(res.status).toBe(200);
+    expect(res.headers.get('cache-control')).toBe('public, max-age=86400');
+    expect(res.body).toMatchObject({ ano: 2026, origem: 'portaria' });
+    expect((res.body as { datas: unknown[] }).datas).toHaveLength(19);
+    expect(calls).toHaveLength(0);
+  });
+
+  it('ano sem portaria vem da lei, com aviso', async () => {
+    const { get } = await start(routedFetch({}).fetch);
+    const res = await get('/v1/feriados/2027');
+    expect(res.body).toMatchObject({ ano: 2027, origem: 'lei' });
+  });
+
+  it.each(['abc', '20266', '2023', '2100'])('ano inválido %j → 400', async (ano) => {
+    const { get } = await start(routedFetch({}).fetch);
+    const res = await get(`/v1/feriados/${ano}`);
+    expect(res.status).toBe(400);
+    expect(res.body).toMatchObject({ erro: { codigo: 'VALIDATION_ERROR' } });
+  });
+});
