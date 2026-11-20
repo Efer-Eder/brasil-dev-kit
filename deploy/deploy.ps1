@@ -44,7 +44,8 @@ $files = @(
   'deploy/docker-compose.yml',
   'deploy/remote-install.sh',
   'deploy/nginx/brasil-dev-kit-http.conf',
-  'deploy/nginx/brasil-dev-kit-location.conf'
+  'deploy/nginx/brasil-dev-kit-location.conf',
+  'site/index.html'
 )
 
 ssh -i $KeyPath $target "install -d -m 700 $stage"

@@ -7,6 +7,7 @@ set -euo pipefail
 STAGE="${1:?informe o diretório com os arquivos enviados}"
 WITH_NGINX="${2:-}"
 APP_DIR=/opt/projects/brasil-dev-kit
+SITE_DIR=/var/www/brasil-dev-kit
 PORT=8795
 TS="$(date -u +%Y%m%dT%H%M%SZ)"
 BACKUP_ROOT=/var/backups/brasil-dev-kit
@@ -27,6 +28,13 @@ echo "==> Instalando arquivos em $APP_DIR"
 install -d -m 755 "$APP_DIR" "$APP_DIR/dist-server"
 install -m 644 "$STAGE/Dockerfile" "$STAGE/docker-compose.yml" "$APP_DIR/"
 install -m 644 "$STAGE/server.js" "$APP_DIR/dist-server/server.js"
+
+echo "==> Página do projeto em $SITE_DIR"
+if [ -f "$STAGE/index.html" ]; then
+  [ -d "$SITE_DIR" ] && tar -czf "$BACKUP/site.tgz" -C "$SITE_DIR" .
+  install -d -m 755 "$SITE_DIR"
+  install -m 644 "$STAGE/index.html" "$SITE_DIR/index.html"
+fi
 
 echo "==> Build e subida do container"
 cd "$APP_DIR"
