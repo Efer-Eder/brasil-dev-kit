@@ -21,6 +21,15 @@ Primeira versão preparada para o npm. A data entra quando for publicada.
 - Export `brasil-dev-kit/package.json`, `CHANGELOG.md` dentro do pacote e
   `publishConfig` com acesso público e proveniência.
 - `pnpm test:coverage` (Vitest + V8).
+- API: especificação OpenAPI 3.1 em `docs/openapi.json`, servida em
+  `/v1/openapi.json`; a versão da API passa a vir do `package.json`.
+- Guia completo em inglês (`docs/en/README.md`), seção de compatibilidade e
+  limitações nos READMEs e roteiro de publicação (`docs/release.md`).
+- Templates de issue e de pull request.
+
+### Corrigido
+
+- Mensagens de validação de UF e de data limitam a entrada repetida a 20 caracteres.
 
 - Estrutura inicial do projeto: TypeScript strict, tsup (ESM + CJS + tipos),
   Vitest e Biome.
