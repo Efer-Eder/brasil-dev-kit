@@ -406,3 +406,27 @@ describe('API — resumo do GitHub', () => {
     expect(await stale.json()).toMatchObject({ desatualizado: true, repositorio: { estrelas: 3 } });
   });
 });
+
+describe('API — OpenAPI', () => {
+  it('serve a especificação com todas as rotas do índice', async () => {
+    const { get } = await start(routedFetch({}).fetch);
+    const spec = (await get('/v1/openapi.json')) as {
+      status: number;
+      body: { openapi: string; info: { version: string }; paths: Record<string, unknown> };
+    };
+    expect(spec.status).toBe(200);
+    expect(spec.body.openapi).toBe('3.1.0');
+    const index = (await get('/')).body as { endpoints: Record<string, string>; versao: string };
+    expect(spec.body.info.version).toBe(index.versao);
+    for (const route of Object.values(index.endpoints)) {
+      expect(spec.body.paths, `rota ${route} documentada`).toHaveProperty([route]);
+    }
+  });
+
+  it('mensagem de erro não repete entrada longa', async () => {
+    const { get } = await start(routedFetch({}).fetch);
+    const res = await get(`/v1/ibge/ufs/${'x'.repeat(500)}/municipios`);
+    expect(res.status).toBe(400);
+    expect(JSON.stringify(res.body).length).toBeLessThan(200);
+  });
+});

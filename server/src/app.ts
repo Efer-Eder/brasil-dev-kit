@@ -1,4 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
+import openapi from '../../docs/openapi.json' with { type: 'json' };
+import pkg from '../../package.json' with { type: 'json' };
 import {
   type CepClient,
   createCepClient,
@@ -24,7 +26,8 @@ import type { ServerConfig } from './config.js';
 import { createGithubCache } from './github.js';
 import { UpstreamBusyError, UpstreamGate } from './limiter.js';
 
-export const API_VERSION = '0.1.0';
+/** Versão da API = versão do pacote (uma fonte só). */
+export const API_VERSION: string = pkg.version;
 const DOCS_URL = 'https://github.com/Efer-Eder/brasil-dev-kit/blob/main/docs/api.md';
 
 type CepCacheValue = { found: true; endereco: Endereco } | { found: false };
@@ -180,6 +183,7 @@ export function createApp(deps: AppDeps): App {
           feriados: '/v1/feriados/{ano}',
           github: '/v1/projeto/github',
           saude: '/v1/health',
+          openapi: '/v1/openapi.json',
         },
         aviso:
           'Serviço gratuito, sem garantia de disponibilidade. Dados de CEP vêm do ViaCEP/BrasilAPI, de UFs/municípios do IBGE e de feriados das leis federais e portarias do governo federal, com cache.',
@@ -201,6 +205,13 @@ export function createApp(deps: AppDeps): App {
       return errorReply(405, 'METHOD_NOT_ALLOWED', 'Use GET.', { allow: 'GET, HEAD, OPTIONS' });
     }
 
+    if (resource === 'openapi.json' && rest.length === 0) {
+      return {
+        status: 200,
+        body: { ...openapi, info: { ...openapi.info, version: API_VERSION } },
+        headers: { 'cache-control': CACHE_HOUR },
+      };
+    }
     if (resource === 'health' && rest.length === 0) {
       return {
         status: 200,
