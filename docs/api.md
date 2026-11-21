@@ -52,6 +52,11 @@ Sempre JSON no formato `{ "erro": { "codigo": "...", "mensagem": "..." } }`.
 | 503    | `SERVICE_UNAVAILABLE`  | A API em si está fora do ar (resposta do Nginx)               |
 | 504    | `TIMEOUT`              | Todos os provedores excederam o tempo limite                  |
 
+Exceção conhecida: um caminho com byte nulo (`%00`) é recusado pelo próprio
+Nginx, antes de chegar na API, com 400 em HTML. A regra que trocaria essa página
+por JSON ficaria no bloco do servidor compartilhado com outros sites, então ficou
+de fora; o pedido é bloqueado do mesmo jeito.
+
 ## Cache
 
 - Cabeçalho `X-Cache: HIT|MISS` nas rotas de CEP e IBGE.
