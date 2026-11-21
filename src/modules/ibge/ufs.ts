@@ -50,6 +50,6 @@ export function resolveUf(input: string | number): { sigla: string; codigoIbge: 
   const fromCode = CODE_TO_SIGLA[value];
   if (fromCode !== undefined) return { sigla: fromCode, codigoIbge: value };
   throw new ValidationError(
-    `UF inválida: ${String(input)}. Use a sigla (ex.: SP) ou o código IBGE (ex.: 35).`,
+    `UF inválida: ${String(input).slice(0, 20)}. Use a sigla (ex.: SP) ou o código IBGE (ex.: 35).`,
   );
 }
