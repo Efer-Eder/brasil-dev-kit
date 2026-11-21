@@ -1,9 +1,10 @@
 name: Release (npm)
 
 # Só roda quando disparado à mão, a partir de uma tag vX.Y.Z.
-# Publica com proveniência (npm provenance via OIDC do GitHub Actions).
-# Pré-requisitos (ver docs/release.md): segredo NPM_TOKEN no repositório e
-# "private": false no package.json. Sem isso o job falha antes de publicar.
+# Publica por Trusted Publishing (OIDC do GitHub Actions): sem token guardado,
+# com proveniência automática. O publicador confiável é configurado no npm
+# apontando para este repositório e para este arquivo (release.yml).
+# Ver docs/release.md, inclusive a primeira publicação.
 on:
   workflow_dispatch:
     inputs:
@@ -27,13 +28,30 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-          registry-url: https://registry.npmjs.org
+      - name: npm com suporte a Trusted Publishing (>= 11.5.1)
+        run: |
+          node -e "
+            const [a, b, c] = process.argv[1].split('.').map(Number);
+            const ok = a > 11 || (a === 11 && (b > 5 || (b === 5 && c >= 1)));
+            if (!ok) { console.error('npm ' + process.argv[1] + ' não tem Trusted Publishing'); process.exit(1); }
+          " "$(npm --version)"
       - run: pnpm install --frozen-lockfile
       - run: pnpm run check
       - run: pnpm run test:package
       - name: Versão do package.json bate com a tag
         run: test "v$(node -p "require('./package.json').version")" = "${GITHUB_REF_NAME}"
+      - name: Token só para a primeira publicação (opcional)
+        # Se o npm não deixar configurar o publicador confiável antes de o pacote
+        # existir, a 0.1.0 sai com um token granular temporário no segredo
+        # NPM_BOOTSTRAP_TOKEN. Depois, apagar o segredo e o token no npm.
+        env:
+          NPM_BOOTSTRAP_TOKEN: ${{ secrets.NPM_BOOTSTRAP_TOKEN }}
+        run: |
+          if [ -n "$NPM_BOOTSTRAP_TOKEN" ]; then
+            echo "//registry.npmjs.org/:_authToken=${NPM_BOOTSTRAP_TOKEN}" > "$HOME/.npmrc"
+            echo "Usando token de bootstrap."
+          else
+            echo "Sem token: publicação por Trusted Publishing (OIDC)."
+          fi
       - name: Publicar
         run: npm publish ${{ inputs.dry_run && '--dry-run' || '' }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
