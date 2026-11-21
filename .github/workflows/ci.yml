@@ -36,3 +36,5 @@ jobs:
       - run: pnpm run build
       - name: Smoke test do pacote gerado
         run: node examples/node/cnpj.mjs
+      - name: Pacote instalado num projeto consumidor isolado
+        run: pnpm run test:package
