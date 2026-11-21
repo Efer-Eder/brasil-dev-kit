@@ -1,0 +1,39 @@
+name: Release (npm)
+
+# Só roda quando disparado à mão, a partir de uma tag vX.Y.Z.
+# Publica com proveniência (npm provenance via OIDC do GitHub Actions).
+# Pré-requisitos (ver docs/release.md): segredo NPM_TOKEN no repositório e
+# "private": false no package.json. Sem isso o job falha antes de publicar.
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Só simular (npm publish --dry-run)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run check
+      - run: pnpm run test:package
+      - name: Versão do package.json bate com a tag
+        run: test "v$(node -p "require('./package.json').version")" = "${GITHUB_REF_NAME}"
+      - name: Publicar
+        run: npm publish ${{ inputs.dry_run && '--dry-run' || '' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
