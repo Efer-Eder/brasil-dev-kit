@@ -1,0 +1,731 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Brasil Dev Kit API",
+    "version": "0.1.0",
+    "summary": "CEP, UFs e municípios do IBGE, feriados nacionais e validação de CNPJ.",
+    "description": "API pública e gratuita, sem cadastro e sem garantia de disponibilidade (sem SLA). Limite de 10 requisições por segundo por IP (rajada de 30); acima disso a resposta é 429 com Retry-After. Os dados vêm de fontes públicas e cada resposta indica a origem quando aplicável. Detalhes: https://github.com/Efer-Eder/brasil-dev-kit/blob/main/docs/api.md",
+    "license": {
+      "name": "MIT",
+      "identifier": "MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://efer.online/api/brasil-dev-kit"
+    }
+  ],
+  "security": [],
+  "tags": [
+    {
+      "name": "CEP",
+      "description": "Endereço a partir do CEP (ViaCEP com fallback para BrasilAPI)."
+    },
+    {
+      "name": "IBGE",
+      "description": "UFs e municípios da API de Localidades do IBGE."
+    },
+    {
+      "name": "Feriados",
+      "description": "Feriados nacionais e pontos facultativos federais (leis e portarias)."
+    },
+    {
+      "name": "CNPJ",
+      "description": "Validação de formato e dígitos verificadores, sem consulta cadastral."
+    },
+    {
+      "name": "Meta",
+      "description": "Saúde da API, especificação e resumo do repositório."
+    }
+  ],
+  "paths": {
+    "/v1/cep/{cep}": {
+      "get": {
+        "operationId": "consultarCep",
+        "tags": ["CEP"],
+        "summary": "Endereço de um CEP",
+        "description": "Consulta o ViaCEP e, se ele estiver indisponível, a BrasilAPI. CEP encontrado fica 7 dias em cache; inexistente, 6 horas.",
+        "parameters": [
+          {
+            "name": "cep",
+            "in": "path",
+            "required": true,
+            "description": "8 dígitos, com ou sem hífen.",
+            "schema": {
+              "type": "string",
+              "examples": ["01310-100"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Endereço normalizado.",
+            "headers": {
+              "X-Cache": {
+                "$ref": "#/components/headers/XCache"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Endereco"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimit"
+          },
+          "502": {
+            "$ref": "#/components/responses/ProviderUnavailable"
+          },
+          "503": {
+            "$ref": "#/components/responses/Busy"
+          },
+          "504": {
+            "$ref": "#/components/responses/Timeout"
+          }
+        }
+      }
+    },
+    "/v1/ibge/ufs": {
+      "get": {
+        "operationId": "listarUfs",
+        "tags": ["IBGE"],
+        "summary": "As 27 UFs, ordenadas por nome",
+        "responses": {
+          "200": {
+            "description": "Lista de UFs (fonte: API de Localidades do IBGE; cache de 24 h).",
+            "headers": {
+              "X-Cache": {
+                "$ref": "#/components/headers/XCache"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Uf"
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimit"
+          },
+          "502": {
+            "$ref": "#/components/responses/ProviderUnavailable"
+          },
+          "503": {
+            "$ref": "#/components/responses/Busy"
+          },
+          "504": {
+            "$ref": "#/components/responses/Timeout"
+          }
+        }
+      }
+    },
+    "/v1/ibge/ufs/{uf}/municipios": {
+      "get": {
+        "operationId": "listarMunicipios",
+        "tags": ["IBGE"],
+        "summary": "Municípios de uma UF, ordenados por nome",
+        "parameters": [
+          {
+            "name": "uf",
+            "in": "path",
+            "required": true,
+            "description": "Sigla (SP) ou código IBGE (35).",
+            "schema": {
+              "type": "string",
+              "examples": ["RR"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de municípios (fonte: API de Localidades do IBGE; cache de 24 h).",
+            "headers": {
+              "X-Cache": {
+                "$ref": "#/components/headers/XCache"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Municipio"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimit"
+          },
+          "502": {
+            "$ref": "#/components/responses/ProviderUnavailable"
+          },
+          "503": {
+            "$ref": "#/components/responses/Busy"
+          },
+          "504": {
+            "$ref": "#/components/responses/Timeout"
+          }
+        }
+      }
+    },
+    "/v1/feriados/{ano}": {
+      "get": {
+        "operationId": "listarFeriados",
+        "tags": ["Feriados"],
+        "summary": "Feriados nacionais e pontos facultativos federais do ano",
+        "description": "Anos com portaria federal conferida trazem o calendário oficial completo (origem `portaria`); os demais, de 2024 a 2099, só os feriados previstos em lei (origem `lei`), com aviso.",
+        "parameters": [
+          {
+            "name": "ano",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}$",
+              "examples": ["2026"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Calendário do ano.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarioFeriados"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimit"
+          }
+        }
+      }
+    },
+    "/v1/cnpj/{cnpj}": {
+      "get": {
+        "operationId": "validarCnpj",
+        "tags": ["CNPJ"],
+        "summary": "Valida formato e dígitos verificadores de um CNPJ",
+        "description": "Aceita CNPJ numérico e alfanumérico, sem a barra (a barra separa a rota). Não consulta a Receita Federal: não diz se a empresa existe ou está regular.",
+        "parameters": [
+          {
+            "name": "cnpj",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "examples": ["12ABC34501DE35"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado da validação (válido ou com o motivo da falha).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CnpjValidacao"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimit"
+          }
+        }
+      }
+    },
+    "/v1/projeto/github": {
+      "get": {
+        "operationId": "resumoGithub",
+        "tags": ["Meta"],
+        "summary": "Resumo do repositório no GitHub (usado na página do projeto)",
+        "description": "Estrelas, forks, issues e PRs abertos, contribuidores, últimos commits e status do CI. Cache de 10 minutos; se o GitHub falhar, devolve o último dado bom com `desatualizado: true`.",
+        "responses": {
+          "200": {
+            "description": "Resumo do repositório.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimit"
+          },
+          "502": {
+            "$ref": "#/components/responses/ProviderUnavailable"
+          }
+        }
+      }
+    },
+    "/v1/health": {
+      "get": {
+        "operationId": "saude",
+        "tags": ["Meta"],
+        "summary": "Saúde da API",
+        "responses": {
+          "200": {
+            "description": "API no ar.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["status", "versao"],
+                  "properties": {
+                    "status": {
+                      "const": "ok"
+                    },
+                    "versao": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimit"
+          }
+        }
+      }
+    },
+    "/v1/openapi.json": {
+      "get": {
+        "operationId": "especificacao",
+        "tags": ["Meta"],
+        "summary": "Esta especificação",
+        "responses": {
+          "200": {
+            "description": "Documento OpenAPI 3.1.",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimit"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "headers": {
+      "XCache": {
+        "description": "HIT quando veio do cache da API, MISS quando consultou a fonte.",
+        "schema": {
+          "type": "string",
+          "enum": ["HIT", "MISS", "STALE"]
+        }
+      },
+      "RetryAfter": {
+        "description": "Segundos para tentar de novo.",
+        "schema": {
+          "type": "integer"
+        }
+      }
+    },
+    "responses": {
+      "ValidationError": {
+        "description": "Entrada inválida (código VALIDATION_ERROR).",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Erro"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Não encontrado (código NOT_FOUND).",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Erro"
+            }
+          }
+        }
+      },
+      "RateLimit": {
+        "description": "Mais de 10 requisições por segundo do mesmo IP (código RATE_LIMIT).",
+        "headers": {
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Erro"
+            }
+          }
+        }
+      },
+      "ProviderUnavailable": {
+        "description": "Fonte de dados fora do ar (código PROVIDER_UNAVAILABLE).",
+        "headers": {
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Erro"
+            }
+          }
+        }
+      },
+      "Busy": {
+        "description": "Limite de consultas novas às fontes atingido, ou a API está indisponível (códigos BUSY e SERVICE_UNAVAILABLE).",
+        "headers": {
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Erro"
+            }
+          }
+        }
+      },
+      "Timeout": {
+        "description": "Todas as fontes excederam o tempo limite (código TIMEOUT).",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Erro"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Erro": {
+        "type": "object",
+        "required": ["erro"],
+        "properties": {
+          "erro": {
+            "type": "object",
+            "required": ["codigo", "mensagem"],
+            "properties": {
+              "codigo": {
+                "type": "string",
+                "enum": [
+                  "VALIDATION_ERROR",
+                  "NOT_FOUND",
+                  "METHOD_NOT_ALLOWED",
+                  "RATE_LIMIT",
+                  "PROVIDER_UNAVAILABLE",
+                  "BUSY",
+                  "SERVICE_UNAVAILABLE",
+                  "TIMEOUT",
+                  "INTERNAL_ERROR"
+                ]
+              },
+              "mensagem": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "Divisao": {
+        "type": "object",
+        "required": ["codigoIbge", "nome"],
+        "properties": {
+          "codigoIbge": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          }
+        }
+      },
+      "Endereco": {
+        "type": "object",
+        "required": [
+          "cep",
+          "uf",
+          "municipio",
+          "bairro",
+          "logradouro",
+          "complemento",
+          "codigoIbgeMunicipio",
+          "fonte"
+        ],
+        "properties": {
+          "cep": {
+            "type": "string",
+            "pattern": "^\\d{8}$"
+          },
+          "uf": {
+            "type": "string"
+          },
+          "municipio": {
+            "type": "string"
+          },
+          "bairro": {
+            "type": ["string", "null"]
+          },
+          "logradouro": {
+            "type": ["string", "null"]
+          },
+          "complemento": {
+            "type": ["string", "null"]
+          },
+          "codigoIbgeMunicipio": {
+            "type": ["string", "null"]
+          },
+          "fonte": {
+            "type": "object",
+            "required": ["provedor", "servicoOrigem"],
+            "properties": {
+              "provedor": {
+                "type": "string",
+                "enum": ["viacep", "brasilapi"]
+              },
+              "servicoOrigem": {
+                "type": ["string", "null"]
+              }
+            }
+          }
+        }
+      },
+      "Uf": {
+        "type": "object",
+        "required": ["codigoIbge", "sigla", "nome", "regiao"],
+        "properties": {
+          "codigoIbge": {
+            "type": "string"
+          },
+          "sigla": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "regiao": {
+            "type": "object",
+            "required": ["codigoIbge", "sigla", "nome"],
+            "properties": {
+              "codigoIbge": {
+                "type": "string"
+              },
+              "sigla": {
+                "type": "string"
+              },
+              "nome": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "Municipio": {
+        "type": "object",
+        "required": [
+          "codigoIbge",
+          "nome",
+          "uf",
+          "microrregiao",
+          "mesorregiao",
+          "regiaoImediata",
+          "regiaoIntermediaria"
+        ],
+        "properties": {
+          "codigoIbge": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "uf": {
+            "type": "string"
+          },
+          "microrregiao": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Divisao"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "mesorregiao": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Divisao"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "regiaoImediata": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Divisao"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "regiaoIntermediaria": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Divisao"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "CalendarioFeriados": {
+        "type": "object",
+        "required": ["ano", "origem", "fontes", "datas", "avisos"],
+        "properties": {
+          "ano": {
+            "type": "integer"
+          },
+          "origem": {
+            "type": "string",
+            "enum": ["portaria", "lei"]
+          },
+          "fontes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["descricao", "url"],
+              "properties": {
+                "descricao": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              }
+            }
+          },
+          "datas": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["data", "nome", "tipo", "periodo", "baseLegal", "observacao"],
+              "properties": {
+                "data": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "nome": {
+                  "type": "string"
+                },
+                "tipo": {
+                  "type": "string",
+                  "enum": ["feriado_nacional", "ponto_facultativo"]
+                },
+                "periodo": {
+                  "type": "string",
+                  "enum": ["dia_inteiro", "ate_14h", "apos_13h"]
+                },
+                "baseLegal": {
+                  "type": "string"
+                },
+                "observacao": {
+                  "type": ["string", "null"]
+                }
+              }
+            }
+          },
+          "avisos": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "CnpjValidacao": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": ["valid", "normalized", "formatted", "kind"],
+            "properties": {
+              "valid": {
+                "const": true
+              },
+              "normalized": {
+                "type": "string"
+              },
+              "formatted": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "enum": ["numeric", "alphanumeric"]
+              },
+              "aviso": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["valid", "reason", "message"],
+            "properties": {
+              "valid": {
+                "const": false
+              },
+              "reason": {
+                "type": "string",
+                "enum": [
+                  "empty",
+                  "invalid_length",
+                  "invalid_characters",
+                  "repeated_characters",
+                  "invalid_check_digits"
+                ]
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
