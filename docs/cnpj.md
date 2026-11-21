@@ -44,21 +44,48 @@ cálculo numérico tradicional em 2000 bases.
   (ex.: `00000000000000`) passam no cálculo do DV, mas são rejeitados com o
   motivo `repeated_characters`, por serem tipicamente valores de preenchimento.
 
-## API
+## Cada etapa é uma função
+
+| Etapa                  | Função                         | O que confere                                                                                       |
+| ---------------------- | ------------------------------ | --------------------------------------------------------------------------------------------------- |
+| Normalização           | `normalizeCnpj`                | Remove `.`, `/`, `-` e espaços; converte para maiúsculas. Não valida.                               |
+| Sintaxe                | `validateCnpjSyntax`           | 14 caracteres, 12 primeiros `0-9`/`A-Z`, 2 últimos dígitos, sem todos iguais. **Não** confere o DV. |
+| Dígitos verificadores  | `hasValidCnpjCheckDigits`      | Os 2 últimos batem com o cálculo oficial (sintaxe inválida dá `false`).                             |
+| Cálculo do DV          | `computeCnpjCheckDigits`       | Calcula os 2 DVs a partir dos 12 primeiros caracteres.                                              |
+| Validação completa     | `validateCnpj` / `isValidCnpj` | Sintaxe + DV, com o motivo da falha.                                                                |
+| Formatação             | `formatCnpj`                   | `XX.XXX.XXX/XXXX-XX`; exige CNPJ válido, ou só sintaxe com `{ checkDigits: false }`.                |
+| **Consulta cadastral** | **não existe neste SDK**       | Existência, situação e dados da empresa só a Receita Federal informa.                               |
 
 ```ts
-import { validateCnpj, isValidCnpj, formatCnpj, computeCnpjCheckDigits } from 'brasil-dev-kit';
+import {
+  computeCnpjCheckDigits,
+  formatCnpj,
+  hasValidCnpjCheckDigits,
+  isValidCnpj,
+  normalizeCnpj,
+  validateCnpj,
+  validateCnpjSyntax,
+} from 'brasil-dev-kit';
+
+normalizeCnpj(' 12.abc.345/01de-35 '); // '12ABC34501DE35'
+
+validateCnpjSyntax('12.ABC.345/01DE-36');
+// { valid: true, normalized: '12ABC34501DE36', kind: 'alphanumeric' }  (sintaxe ok, DV não conferido)
+hasValidCnpjCheckDigits('12.ABC.345/01DE-36'); // false
+computeCnpjCheckDigits('12ABC34501DE'); // '35'
 
 validateCnpj('12.ABC.345/01DE-35');
 // { valid: true, normalized: '12ABC34501DE35', formatted: '12.ABC.345/01DE-35', kind: 'alphanumeric' }
-
 validateCnpj('12ABC34501DE36');
 // { valid: false, reason: 'invalid_check_digits', message: 'Dígitos verificadores não conferem.' }
-
 isValidCnpj('11222333000181'); // true
+
 formatCnpj('11222333000181'); // '11.222.333/0001-81' (lança ValidationError se inválido)
-computeCnpjCheckDigits('12ABC34501DE'); // '35'
+formatCnpj('12abc34501de36', { checkDigits: false }); // '12.ABC.345/01DE-36'
 ```
 
+Na fachada: `br.cnpj.normalize`, `checkSyntax`, `hasValidCheckDigits`,
+`computeCheckDigits`, `validate`, `isValid` e `format`.
+
 Motivos de falha: `empty`, `invalid_length`, `invalid_characters`,
-`repeated_characters`, `invalid_check_digits`.
+`repeated_characters` (etapa de sintaxe) e `invalid_check_digits`.
