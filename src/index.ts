@@ -44,12 +44,17 @@ export {
 } from './modules/cep/index.js';
 export {
   type CnpjInvalidReason,
+  type CnpjSyntaxInvalidReason,
+  type CnpjSyntaxResult,
   type CnpjValidationResult,
   computeCnpjCheckDigits,
+  type FormatCnpjOptions,
   formatCnpj,
+  hasValidCnpjCheckDigits,
   isValidCnpj,
   normalizeCnpj,
   validateCnpj,
+  validateCnpjSyntax,
 } from './modules/cnpj/index.js';
 export {
   ANO_MAXIMO,

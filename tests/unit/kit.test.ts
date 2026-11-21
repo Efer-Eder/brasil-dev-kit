@@ -89,3 +89,12 @@ describe('createBrasilDevKit', () => {
     expect(calls).toHaveLength(0);
   });
 });
+
+describe('createBrasilDevKit: etapas do CNPJ', () => {
+  it('expõe sintaxe e DV separados', () => {
+    const br = createBrasilDevKit({ fetch: async () => new Response('{}') });
+    expect(br.cnpj.checkSyntax('12ABC34501DE36')).toMatchObject({ valid: true });
+    expect(br.cnpj.hasValidCheckDigits('12ABC34501DE36')).toBe(false);
+    expect(br.cnpj.format('12ABC34501DE36', { checkDigits: false })).toBe('12.ABC.345/01DE-36');
+  });
+});

@@ -3,9 +3,11 @@ import { ValidationError } from '../../../src/core/errors.js';
 import {
   computeCnpjCheckDigits,
   formatCnpj,
+  hasValidCnpjCheckDigits,
   isValidCnpj,
   normalizeCnpj,
   validateCnpj,
+  validateCnpjSyntax,
 } from '../../../src/modules/cnpj/index.js';
 import fixtures from '../../fixtures/cnpj/cases.json' with { type: 'json' };
 
@@ -99,5 +101,47 @@ describe('isValidCnpj e formatCnpj', () => {
 
   it('formatCnpj lança ValidationError para CNPJ inválido', () => {
     expect(() => formatCnpj('11222333000182')).toThrow(ValidationError);
+  });
+});
+
+describe('etapas separadas: sintaxe, dígitos verificadores, normalização e formatação', () => {
+  it('validateCnpjSyntax aceita sintaxe correta mesmo com DV errado', () => {
+    expect(validateCnpjSyntax('12.ABC.345/01DE-36')).toEqual({
+      valid: true,
+      normalized: '12ABC34501DE36',
+      kind: 'alphanumeric',
+    });
+    expect(validateCnpjSyntax('11222333000182')).toMatchObject({ valid: true, kind: 'numeric' });
+  });
+
+  it.each([
+    ['', 'empty'],
+    ['123', 'invalid_length'],
+    ['12ABC34501DE3A', 'invalid_characters'],
+    ['00000000000000', 'repeated_characters'],
+  ])('validateCnpjSyntax(%j) → %s', (input, reason) => {
+    expect(validateCnpjSyntax(input)).toMatchObject({ valid: false, reason });
+  });
+
+  it('hasValidCnpjCheckDigits só olha os dígitos verificadores', () => {
+    expect(hasValidCnpjCheckDigits('12.ABC.345/01DE-35')).toBe(true);
+    expect(hasValidCnpjCheckDigits('12ABC34501DE36')).toBe(false);
+    expect(hasValidCnpjCheckDigits('11222333000181')).toBe(true);
+    // sintaxe inválida nunca tem DV válido
+    expect(hasValidCnpjCheckDigits('123')).toBe(false);
+  });
+
+  it('validateCnpj continua combinando as duas etapas', () => {
+    expect(validateCnpj('12ABC34501DE36')).toMatchObject({
+      valid: false,
+      reason: 'invalid_check_digits',
+    });
+    expect(validateCnpj('123')).toMatchObject({ valid: false, reason: 'invalid_length' });
+  });
+
+  it('formatCnpj com checkDigits: false formata quem tem só a sintaxe certa', () => {
+    expect(formatCnpj('12abc34501de36', { checkDigits: false })).toBe('12.ABC.345/01DE-36');
+    expect(() => formatCnpj('12abc34501de36')).toThrow(ValidationError);
+    expect(() => formatCnpj('123', { checkDigits: false })).toThrow(ValidationError);
   });
 });

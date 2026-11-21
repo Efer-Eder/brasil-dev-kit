@@ -131,7 +131,10 @@ function parseData(data: string | Date): { iso: string; ano: number } {
     return { iso: value, ano: data.getFullYear() };
   }
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(data);
-  if (!match) throw new ValidationError(`Data deve estar no formato AAAA-MM-DD; recebido: ${data}`);
+  if (!match)
+    throw new ValidationError(
+      `Data deve estar no formato AAAA-MM-DD; recebido: ${data.slice(0, 20)}`,
+    );
   const [, y, m, d] = match.map(Number) as [number, number, number, number];
   const check = new Date(Date.UTC(y, m - 1, d));
   if (check.getUTCMonth() !== m - 1 || check.getUTCDate() !== d) {

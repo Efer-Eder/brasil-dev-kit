@@ -1,7 +1,7 @@
 <div align="center">
 
 <a href="https://efer.online/projeto/brasil-dev-kit/">
-  <img src="docs/assets/readme/hero-pt.gif" width="880" alt="Brasil Dev Kit: dados públicos brasileiros com tipos, fonte e erros previsíveis">
+  <img src="https://raw.githubusercontent.com/Efer-Eder/brasil-dev-kit/main/docs/assets/readme/hero-pt.gif" width="880" alt="Brasil Dev Kit: dados públicos brasileiros com tipos, fonte e erros previsíveis">
 </a>
 
 <br><br>
@@ -37,7 +37,7 @@ de chave paga.
 
 Sem instalar nada, direto do terminal:
 
-<a href="docs/assets/readme/terminal-pt.gif"><img src="docs/assets/readme/terminal-pt.gif" width="880" alt="Terminal consultando a API pública: CEP, feriados de 2026 e CNPJ alfanumérico"></a>
+<a href="https://raw.githubusercontent.com/Efer-Eder/brasil-dev-kit/main/docs/assets/readme/terminal-pt.gif"><img src="https://raw.githubusercontent.com/Efer-Eder/brasil-dev-kit/main/docs/assets/readme/terminal-pt.gif" width="880" alt="Terminal consultando a API pública: CEP, feriados de 2026 e CNPJ alfanumérico"></a>
 
 ```powershell
 curl https://efer.online/api/brasil-dev-kit/v1/cep/01310-100
@@ -64,7 +64,7 @@ Detalhes e fontes de cada módulo: [CEP](docs/cep.md) · [IBGE](docs/ibge.md) ·
 
 ## No seu código
 
-<a href="docs/assets/readme/sdk-pt.gif"><img src="docs/assets/readme/sdk-pt.gif" width="880" alt="Editor com exemplo em TypeScript e a saída real ao lado"></a>
+<a href="https://raw.githubusercontent.com/Efer-Eder/brasil-dev-kit/main/docs/assets/readme/sdk-pt.gif"><img src="https://raw.githubusercontent.com/Efer-Eder/brasil-dev-kit/main/docs/assets/readme/sdk-pt.gif" width="880" alt="Editor com exemplo em TypeScript e a saída real ao lado"></a>
 
 ```powershell
 git clone https://github.com/Efer-Eder/brasil-dev-kit.git
@@ -138,6 +138,19 @@ Rotas, códigos de erro e as contas de capacidade em [docs/api.md](docs/api.md).
 
 Todos herdam de `BrasilDevKitError`.
 
+## Compatibilidade e limitações
+
+- **Testado em Node.js 22 e 24**, em Linux e Windows (CI a cada mudança). Usa `fetch`,
+  `AbortSignal.any` e `structuredClone`; navegadores e outros runtimes com essas APIs
+  podem funcionar, mas **não são testados** (no navegador, CEP e IBGE também dependem
+  do CORS de cada provedor).
+- Pacote ESM + CommonJS com tipos, sem dependências de runtime; ainda **não publicado
+  no npm** (preparado, ver [docs/release.md](docs/release.md)).
+- CNPJ: só formato e dígitos verificadores, sem consulta cadastral.
+- CEP: dados do ViaCEP e da BrasilAPI, que podem divergir e limitar uso massivo.
+- Feriados: só nacionais e pontos facultativos federais; estaduais e municipais não.
+- API pública: gratuita e sem SLA. Para uso intenso, rode o SDK no seu serviço.
+
 ## Rodando localmente
 
 Requisitos: **Node.js ≥ 22.12**, Git e **pnpm 12** (sem pnpm global, use
@@ -147,6 +160,7 @@ Requisitos: **Node.js ≥ 22.12**, Git e **pnpm 12** (sem pnpm global, use
 pnpm install
 pnpm run check               # lint + typecheck + testes + build
 pnpm test:integration        # opcional: testa contra as APIs reais
+pnpm test:package            # instala o .tgz num projeto consumidor isolado
 node dist-server/server.js   # API local em http://127.0.0.1:8795
 node examples/node/cep.mjs 01310-100
 ```
@@ -156,7 +170,8 @@ com saídas reais da API e do SDK.
 
 ## Documentação
 
-- [API pública: rotas, erros e capacidade](docs/api.md) · [Deploy](docs/deploy.md)
+- [API pública: rotas, erros e capacidade](docs/api.md) · [OpenAPI](docs/openapi.json) · [Deploy](docs/deploy.md)
+- [Como publicar no npm](docs/release.md) · [Guide in English](docs/en/README.md)
 - [CEP](docs/cep.md) · [IBGE](docs/ibge.md) · [Feriados](docs/feriados.md) · [CNPJ](docs/cnpj.md)
 - [Arquitetura](docs/architecture.md) · [Decisões (ADRs)](docs/adr/)
 - [Progresso](PROGRESS.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md)

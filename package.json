@@ -1,13 +1,17 @@
 {
   "name": "brasil-dev-kit",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "description": "SDK TypeScript para dados públicos brasileiros (em desenvolvimento).",
   "license": "MIT",
   "author": "Efer Eder",
+  "homepage": "https://efer.online/projeto/brasil-dev-kit/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Efer-Eder/brasil-dev-kit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Efer-Eder/brasil-dev-kit/issues"
   },
   "keywords": [
     "typescript",
@@ -31,16 +35,22 @@
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
       }
-    }
+    },
+    "./package.json": "./package.json"
   },
   "files": [
-    "dist"
+    "dist",
+    "CHANGELOG.md"
   ],
   "sideEffects": false,
   "engines": {
     "node": ">=22.12"
   },
   "packageManager": "pnpm@12.21.0",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",
@@ -50,11 +60,14 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "check": "pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build",
-    "test:integration": "vitest run --config vitest.integration.config.ts"
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:coverage": "vitest run --coverage",
+    "test:package": "node scripts/check-package.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.8",
     "@types/node": "24.19.2",
+    "@vitest/coverage-v8": "5.1.1",
     "tsup": "9.0.0",
     "typescript": "5.9.3",
     "vitest": "5.1.1"

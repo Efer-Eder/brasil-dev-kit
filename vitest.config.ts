@@ -6,5 +6,10 @@ export default defineConfig({
     environment: 'node',
     clearMocks: true,
     restoreMocks: true,
+    coverage: {
+      provider: 'v8',
+      include: ['src/**'],
+      reporter: ['text-summary', 'text'],
+    },
   },
 });
