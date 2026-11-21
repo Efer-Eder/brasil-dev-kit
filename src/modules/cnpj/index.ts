@@ -85,42 +85,87 @@ export function computeCnpjCheckDigits(base: string): string {
   return `${first}${second}`;
 }
 
-/** Valida um CNPJ (numérico ou alfanumérico) e devolve o motivo em caso de falha. */
-export function validateCnpj(input: string): CnpjValidationResult {
+/** Motivos de falha da etapa de sintaxe (tudo menos os dígitos verificadores). */
+export type CnpjSyntaxInvalidReason = Exclude<CnpjInvalidReason, 'invalid_check_digits'>;
+
+export type CnpjSyntaxResult =
+  | {
+      valid: true;
+      /** 14 caracteres, sem pontuação, letras em maiúsculas. */
+      normalized: string;
+      kind: 'numeric' | 'alphanumeric';
+    }
+  | {
+      valid: false;
+      reason: CnpjSyntaxInvalidReason;
+      message: string;
+    };
+
+/**
+ * Etapa 1, **sintaxe**: confere tamanho (14), caracteres permitidos (12 primeiros
+ * 0-9 ou A-Z, 2 últimos dígitos) e rejeita valores com todos os caracteres iguais.
+ * **Não** confere os dígitos verificadores.
+ */
+export function validateCnpjSyntax(input: string): CnpjSyntaxResult {
   if (typeof input !== 'string' || input.trim() === '') {
-    return invalid('empty', 'CNPJ vazio.');
+    return { valid: false, reason: 'empty', message: 'CNPJ vazio.' };
   }
   const normalized = normalizeCnpj(input);
 
   if (normalized.length !== CNPJ_LENGTH) {
-    return invalid(
-      'invalid_length',
-      `CNPJ deve ter ${CNPJ_LENGTH} caracteres sem pontuação; recebido: ${normalized.length}.`,
-    );
+    return {
+      valid: false,
+      reason: 'invalid_length',
+      message: `CNPJ deve ter ${CNPJ_LENGTH} caracteres sem pontuação; recebido: ${normalized.length}.`,
+    };
   }
   if (!STRUCTURE.test(normalized)) {
-    return invalid(
-      'invalid_characters',
-      'Os 12 primeiros caracteres devem ser 0-9 ou A-Z e os 2 últimos (DV) devem ser dígitos.',
-    );
+    return {
+      valid: false,
+      reason: 'invalid_characters',
+      message:
+        'Os 12 primeiros caracteres devem ser 0-9 ou A-Z e os 2 últimos (DV) devem ser dígitos.',
+    };
   }
   // Convenção desta biblioteca (não consta do manual de cálculo): sequências com
   // todos os caracteres iguais, como 00000000000000, passam no cálculo do DV,
   // mas são rejeitadas por serem tipicamente valores de preenchimento.
   if (/^(.)\1+$/.test(normalized)) {
-    return invalid('repeated_characters', 'CNPJ com todos os caracteres iguais não é aceito.');
+    return {
+      valid: false,
+      reason: 'repeated_characters',
+      message: 'CNPJ com todos os caracteres iguais não é aceito.',
+    };
   }
+  return { valid: true, normalized, kind: /^\d+$/.test(normalized) ? 'numeric' : 'alphanumeric' };
+}
 
-  const expected = computeCnpjCheckDigits(normalized.slice(0, BASE_LENGTH));
-  if (normalized.slice(BASE_LENGTH) !== expected) {
+/**
+ * Etapa 2, **dígitos verificadores**: `true` se os 2 últimos caracteres batem com
+ * o cálculo oficial sobre os 12 primeiros. Entradas com sintaxe inválida dão `false`.
+ */
+export function hasValidCnpjCheckDigits(input: string): boolean {
+  const syntax = validateCnpjSyntax(input);
+  if (!syntax.valid) return false;
+  const { normalized } = syntax;
+  return normalized.slice(BASE_LENGTH) === computeCnpjCheckDigits(normalized.slice(0, BASE_LENGTH));
+}
+
+/**
+ * Validação completa (sintaxe + dígitos verificadores), com o motivo em caso de
+ * falha. Não consulta a Receita Federal: não diz se a empresa existe ou está regular.
+ */
+export function validateCnpj(input: string): CnpjValidationResult {
+  const syntax = validateCnpjSyntax(input);
+  if (!syntax.valid) return syntax;
+  if (!hasValidCnpjCheckDigits(syntax.normalized)) {
     return invalid('invalid_check_digits', 'Dígitos verificadores não conferem.');
   }
-
   return {
     valid: true,
-    normalized,
-    formatted: format(normalized),
-    kind: /^\d+$/.test(normalized) ? 'numeric' : 'alphanumeric',
+    normalized: syntax.normalized,
+    formatted: format(syntax.normalized),
+    kind: syntax.kind,
   };
 }
 
@@ -129,11 +174,25 @@ export function isValidCnpj(input: string): boolean {
   return validateCnpj(input).valid;
 }
 
+export interface FormatCnpjOptions {
+  /**
+   * Exige dígitos verificadores corretos. Padrão: `true`. Com `false`, basta a
+   * sintaxe estar certa (útil para exibir um valor digitado antes de validar).
+   */
+  checkDigits?: boolean;
+}
+
 /**
- * Formata um CNPJ válido como `XX.XXX.XXX/XXXX-XX`.
- * Lança `ValidationError` se o CNPJ for inválido.
+ * Etapa de **formatação**: devolve `XX.XXX.XXX/XXXX-XX`.
+ * Lança `ValidationError` se o CNPJ for inválido (ou só a sintaxe, com
+ * `checkDigits: false`).
  */
-export function formatCnpj(input: string): string {
+export function formatCnpj(input: string, options: FormatCnpjOptions = {}): string {
+  if (options.checkDigits === false) {
+    const syntax = validateCnpjSyntax(input);
+    if (!syntax.valid) throw new ValidationError(syntax.message);
+    return format(syntax.normalized);
+  }
   const result = validateCnpj(input);
   if (!result.valid) throw new ValidationError(result.message);
   return result.formatted;

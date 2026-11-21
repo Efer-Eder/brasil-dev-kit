@@ -1,12 +1,16 @@
 import type { FetchLike, RetryOptions } from './core/http.js';
 import { type CepClient, type CepClientOptions, createCepClient } from './modules/cep/index.js';
 import {
+  type CnpjSyntaxResult,
   type CnpjValidationResult,
   computeCnpjCheckDigits,
+  type FormatCnpjOptions,
   formatCnpj,
+  hasValidCnpjCheckDigits,
   isValidCnpj,
   normalizeCnpj,
   validateCnpj,
+  validateCnpjSyntax,
 } from './modules/cnpj/index.js';
 import {
   buscarDataNacional,
@@ -56,9 +60,14 @@ export interface BrasilDevKit {
   };
   /** Validação estrutural de CNPJ numérico e alfanumérico. Não usa a rede. */
   readonly cnpj: {
+    /** Sintaxe + dígitos verificadores. Não consulta a Receita Federal. */
     validate(cnpj: string): CnpjValidationResult;
     isValid(cnpj: string): boolean;
-    format(cnpj: string): string;
+    /** Só a sintaxe (tamanho, caracteres, repetição). */
+    checkSyntax(cnpj: string): CnpjSyntaxResult;
+    /** Só os dígitos verificadores. */
+    hasValidCheckDigits(cnpj: string): boolean;
+    format(cnpj: string, options?: FormatCnpjOptions): string;
     normalize(cnpj: string): string;
     computeCheckDigits(base12: string): string;
   };
@@ -98,6 +107,8 @@ export function createBrasilDevKit(options: BrasilDevKitOptions = {}): BrasilDev
     cnpj: Object.freeze({
       validate: validateCnpj,
       isValid: isValidCnpj,
+      checkSyntax: validateCnpjSyntax,
+      hasValidCheckDigits: hasValidCnpjCheckDigits,
       format: formatCnpj,
       normalize: normalizeCnpj,
       computeCheckDigits: computeCnpjCheckDigits,
