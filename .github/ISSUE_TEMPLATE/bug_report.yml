@@ -1,0 +1,39 @@
+name: Bug
+description: Algo não funciona como a documentação diz
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Obrigado por reportar. Não inclua dados pessoais, tokens nem CNPJs/CEPs de clientes
+        reais: use exemplos fictícios ou públicos (ex.: 01310-100, 12.ABC.345/01DE-35).
+        Vulnerabilidades: use o relato privado descrito no SECURITY.md, não uma issue.
+  - type: dropdown
+    id: onde
+    attributes:
+      label: Onde aconteceu
+      options:
+        - SDK (biblioteca)
+        - API pública (efer.online)
+        - Documentação
+    validations:
+      required: true
+  - type: textarea
+    id: passos
+    attributes:
+      label: Como reproduzir
+      description: Código mínimo ou chamada HTTP que mostra o problema.
+      render: ts
+    validations:
+      required: true
+  - type: textarea
+    id: esperado
+    attributes:
+      label: O que você esperava e o que aconteceu
+    validations:
+      required: true
+  - type: input
+    id: versao
+    attributes:
+      label: Versão e ambiente
+      placeholder: "brasil-dev-kit 0.1.0, Node 24, Windows 11"

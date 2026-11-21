@@ -1,0 +1,20 @@
+name: Ideia ou nova fonte de dados
+description: Sugira um recurso ou uma integração
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problema
+    attributes:
+      label: Que problema isso resolve
+    validations:
+      required: true
+  - type: textarea
+    id: proposta
+    attributes:
+      label: Proposta
+      description: Como você imagina a API (nomes, parâmetros, exemplo de uso).
+  - type: input
+    id: fonte
+    attributes:
+      label: Fonte oficial (para novas integrações)
+      description: Link da documentação oficial e dos termos de uso. Sem fonte documentada, a integração não entra.

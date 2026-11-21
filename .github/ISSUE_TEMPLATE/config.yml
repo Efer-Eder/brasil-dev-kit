@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Relatar vulnerabilidade (privado)
+    url: https://github.com/Efer-Eder/brasil-dev-kit/security/advisories/new
+    about: Problemas de segurança não devem ir em issue pública.
+  - name: Testar a API no navegador
+    url: https://efer.online/projeto/brasil-dev-kit/
+    about: Playground da API pública e documentação.
