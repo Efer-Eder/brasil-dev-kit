@@ -1,7 +1,7 @@
 <div align="center">
 
 <a href="https://efer.online/projeto/brasil-dev-kit/">
-  <img src="docs/assets/readme/hero-pt.gif" width="880" alt="Brasil Dev Kit: dados públicos brasileiros com tipos, fonte e erros previsíveis">
+  <img src="https://raw.githubusercontent.com/Efer-Eder/brasil-dev-kit/main/docs/assets/readme/hero-pt.gif" width="880" alt="Brasil Dev Kit: dados públicos brasileiros com tipos, fonte e erros previsíveis">
 </a>
 
 <br><br>
@@ -37,7 +37,7 @@ de chave paga.
 
 Sem instalar nada, direto do terminal:
 
-<a href="docs/assets/readme/terminal-pt.gif"><img src="docs/assets/readme/terminal-pt.gif" width="880" alt="Terminal consultando a API pública: CEP, feriados de 2026 e CNPJ alfanumérico"></a>
+<a href="https://raw.githubusercontent.com/Efer-Eder/brasil-dev-kit/main/docs/assets/readme/terminal-pt.gif"><img src="https://raw.githubusercontent.com/Efer-Eder/brasil-dev-kit/main/docs/assets/readme/terminal-pt.gif" width="880" alt="Terminal consultando a API pública: CEP, feriados de 2026 e CNPJ alfanumérico"></a>
 
 ```powershell
 curl https://efer.online/api/brasil-dev-kit/v1/cep/01310-100
@@ -64,7 +64,7 @@ Detalhes e fontes de cada módulo: [CEP](docs/cep.md) · [IBGE](docs/ibge.md) ·
 
 ## No seu código
 
-<a href="docs/assets/readme/sdk-pt.gif"><img src="docs/assets/readme/sdk-pt.gif" width="880" alt="Editor com exemplo em TypeScript e a saída real ao lado"></a>
+<a href="https://raw.githubusercontent.com/Efer-Eder/brasil-dev-kit/main/docs/assets/readme/sdk-pt.gif"><img src="https://raw.githubusercontent.com/Efer-Eder/brasil-dev-kit/main/docs/assets/readme/sdk-pt.gif" width="880" alt="Editor com exemplo em TypeScript e a saída real ao lado"></a>
 
 ```powershell
 git clone https://github.com/Efer-Eder/brasil-dev-kit.git

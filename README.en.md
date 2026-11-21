@@ -1,7 +1,7 @@
 <div align="center">
 
 <a href="https://efer.online/projeto/brasil-dev-kit/">
-  <img src="docs/assets/readme/hero-en.gif" width="880" alt="Brasil Dev Kit: Brazilian public data with types, provenance and predictable errors">
+  <img src="https://raw.githubusercontent.com/Efer-Eder/brasil-dev-kit/main/docs/assets/readme/hero-en.gif" width="880" alt="Brasil Dev Kit: Brazilian public data with types, provenance and predictable errors">
 </a>
 
 <br><br>
@@ -37,7 +37,7 @@ came from, every error has a stable code, and nothing depends on a paid key.
 
 Nothing to install, straight from your terminal:
 
-<a href="docs/assets/readme/terminal-en.gif"><img src="docs/assets/readme/terminal-en.gif" width="880" alt="Terminal calling the public API: CEP, 2026 holidays and alphanumeric CNPJ"></a>
+<a href="https://raw.githubusercontent.com/Efer-Eder/brasil-dev-kit/main/docs/assets/readme/terminal-en.gif"><img src="https://raw.githubusercontent.com/Efer-Eder/brasil-dev-kit/main/docs/assets/readme/terminal-en.gif" width="880" alt="Terminal calling the public API: CEP, 2026 holidays and alphanumeric CNPJ"></a>
 
 ```powershell
 curl https://efer.online/api/brasil-dev-kit/v1/cep/01310-100
@@ -65,7 +65,7 @@ matching the official sources. Module docs (pt-BR): [CEP](docs/cep.md) ·
 
 ## In your code
 
-<a href="docs/assets/readme/sdk-en.gif"><img src="docs/assets/readme/sdk-en.gif" width="880" alt="Editor with a TypeScript example and its real output"></a>
+<a href="https://raw.githubusercontent.com/Efer-Eder/brasil-dev-kit/main/docs/assets/readme/sdk-en.gif"><img src="https://raw.githubusercontent.com/Efer-Eder/brasil-dev-kit/main/docs/assets/readme/sdk-en.gif" width="880" alt="Editor with a TypeScript example and its real output"></a>
 
 ```powershell
 git clone https://github.com/Efer-Eder/brasil-dev-kit.git
