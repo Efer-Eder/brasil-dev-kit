@@ -100,3 +100,67 @@ feriados e CNPJ funcionam no SDK e na API (verificado com chamadas reais em
 - Mudar a API pública do CNPJ quebraria quem já usa `validateCnpj`: as funções
   novas precisam ser adicionais, sem alterar as existentes.
 - Imagens absolutas no README dependem do caminho no GitHub continuar o mesmo.
+
+## 2. Alterações implementadas (branch `chore/release-readiness`, local)
+
+| Item                                                                                                                                                                                     | Prioridade | Estado                                  | Evidência                                                                                   |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | --------------------------------------- | ------------------------------------------------------------------------------------------- |
+| CNPJ em etapas: `validateCnpjSyntax`, `hasValidCnpjCheckDigits`, `formatCnpj(..., { checkDigits: false })`; fachada com `checkSyntax` e `hasValidCheckDigits`; `validateCnpj` inalterado | P2.1       | Implementado e testado                  | 9 testes novos em `cnpj.test.ts` e `kit.test.ts`; testes antigos de CNPJ passam sem mudança |
+| Metadados para o npm: versão `0.1.0`, `CHANGELOG.md` no pacote, export `./package.json`, `homepage`, `bugs`, `publishConfig` (público, proveniência)                                     | P2.2       | Implementado e testado                  | `npm pack --dry-run`, `publint --strict`, attw                                              |
+| Roteiro e workflow de publicação (`docs/release.md`, `release.yml` manual, a partir de tag)                                                                                              | P2.2       | Preparado                               | Depende de conta npm, segredo `NPM_TOKEN`, remover `"private": true` e aprovação            |
+| Imagens do README com URL absoluta (aparecem no npm)                                                                                                                                     | P2.3       | Implementado                            | URLs `raw.githubusercontent.com/.../main/docs/assets/readme/*`                              |
+| `pnpm test:package`: instala o `.tgz` num consumidor isolado e testa ESM, CJS, `package.json` e tipos (`nodenext` e `bundler`, strict); no CI                                            | P2.4       | Implementado e testado                  | 6 etapas OK localmente; passo novo no `ci.yml` (roda no CI após o push)                     |
+| Guia completo em inglês (`docs/en/README.md`) e links nos READMEs                                                                                                                        | P2.5       | Implementado                            |                                                                                             |
+| OpenAPI 3.1 (`docs/openapi.json`) servida em `/v1/openapi.json`                                                                                                                          | P2.6       | Implementado e testado; deploy pendente | Redocly: válida, 0 avisos; teste confere que toda rota do índice está documentada           |
+| Templates de issue e PR                                                                                                                                                                  | P2.7       | Implementado                            | `.github/ISSUE_TEMPLATE/`, `pull_request_template.md`                                       |
+| Compatibilidade e limitações documentadas                                                                                                                                                | P2.8       | Implementado                            | READMEs pt/en e guia em inglês                                                              |
+| Entrada do usuário limitada a 20 caracteres nas mensagens de UF e data                                                                                                                   | P3.1       | Implementado e testado; deploy pendente | Teste com UF de 500 caracteres                                                              |
+| Versão da API derivada do `package.json`                                                                                                                                                 | P3.4       | Implementado e testado; deploy pendente | Teste compara `info.version` da OpenAPI com o índice                                        |
+| Cobertura (`pnpm test:coverage`)                                                                                                                                                         | P3.3       | Implementado (local)                    | Ver seção 3                                                                                 |
+
+## 3. Testes executados (2026-11-21, Windows 11, Node 24.16)
+
+| Comando                               | Resultado                                                                          |
+| ------------------------------------- | ---------------------------------------------------------------------------------- |
+| `pnpm run check`                      | lint 83 arquivos sem avisos; typecheck OK; **238 testes** em 10 arquivos; build OK |
+| `pnpm run test:package`               | 6 etapas OK (pack, install offline, ESM, CJS, tipos nodenext, tipos bundler)       |
+| `pnpm test:coverage`                  | 96,00% instruções, 93,58% ramos, 96,11% funções, 98,20% linhas (`src/`)            |
+| `npm pack --dry-run`                  | `brasil-dev-kit@0.1.0`, 11 arquivos, 91,8 kB compactado, 352,4 kB descompactado    |
+| `publint --pack npm --strict`         | All good                                                                           |
+| `@arethetypeswrong/cli --pack`        | No problems found                                                                  |
+| `@redocly/cli lint docs/openapi.json` | válida, 0 avisos                                                                   |
+| `pnpm audit`                          | nenhuma vulnerabilidade conhecida                                                  |
+
+Não executado nesta etapa: testes de integração contra as APIs reais (última
+execução OK em 20/11/2026; rodam no workflow semanal) e o CI no GitHub (depende
+do push, que aguarda aprovação).
+
+## 4. Problemas pendentes
+
+- **Publicação no npm**: preparada, não executada (precisa de aprovação, conta
+  npm com 2FA e segredo `NPM_TOKEN`; ver `docs/release.md`).
+- **Deploy da API e da página**: a rota `/v1/openapi.json` e as mensagens de
+  erro limitadas só vão ao ar com novo deploy (aprovação).
+- **P3.2**: `%00` no caminho segue recebendo 400 em HTML do Nginx (ajuste de
+  `error_page` no snippet, junto com um deploy aprovado).
+- Navegadores e runtimes além do Node não são testados (documentado).
+- Cobertura não é publicada no CI (só local); sem badge de cobertura de propósito.
+
+## 5. Decisões
+
+- As funções novas de CNPJ são **adicionais**: nenhuma assinatura existente mudou.
+- `"private": true` fica como trava até a aprovação da publicação.
+- Release só manual, a partir de tag, com simulação (`--dry-run`) como padrão.
+- OpenAPI escrita à mão e testada contra o índice da API (sem gerador extra).
+
+## 6. Próximos passos
+
+1. Aprovar o push do branch e o PR (CI completo, inclusive `test:package`, no GitHub).
+2. Aprovar o deploy da API/página (OpenAPI no ar).
+3. Decidir a publicação no npm e seguir `docs/release.md`.
+
+## 7. Bloqueios externos e riscos
+
+- Conta e token do npm são do mantenedor (não ficam no repositório).
+- Provedores de CEP são terceiros, sem SLA; a API pública também não tem SLA.
+- Imagens absolutas no README dependem do caminho `main/docs/assets/readme/`.
