@@ -7,9 +7,9 @@ projeto adota o [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Unreleased]
 
-## [0.1.0] - ainda não publicada
+## [0.1.0] - 2026-11-21
 
-Primeira versão preparada para o npm. A data entra quando for publicada.
+Primeira versão publicada no npm.
 
 ### Adicionado
 
@@ -30,6 +30,8 @@ Primeira versão preparada para o npm. A data entra quando for publicada.
 ### Corrigido
 
 - Mensagens de validação de UF e de data limitam a entrada repetida a 20 caracteres.
+
+### Base do projeto
 
 - Estrutura inicial do projeto: TypeScript strict, tsup (ESM + CJS + tipos),
   Vitest e Biome.
