@@ -1,5 +1,19 @@
 # Progresso
 
+## 2026-11-26 — Etapa 11: v0.1.0 no npm
+
+- Publicada pelo workflow `Release (npm)` na tag `v0.1.0` (run 45861980213, com o
+  token temporário). O npm aplicou publicação em etapas (marcador `0.0.0-stage`,
+  depois a 0.1.0). `latest` = 0.1.0, proveniência SLSA v1 do commit `cfcd43f`.
+- Testado num projeto consumidor limpo: `npm i` traz dist, READMEs, LICENSE e
+  CHANGELOG; `cnpj.validate` funciona.
+- GitHub Release v0.1.0 publicado.
+- Pendente: apagar o segredo `NPM_BOOTSTRAP_TOKEN`, revogar o token no npm e
+  configurar o Trusted Publishing. A página do site do npm ainda diz que não há
+  README (o registro já tem); ver `docs/release.md`.
+- READMEs e guia em inglês passam a instalar pelo npm; bancos e DDD ficam para a
+  0.2.0. O CHANGELOG traz a data real da publicação (2026-11-26).
+
 ## 2026-11-26 — Etapa 10: bancos e DDD
 
 - Fontes conferidas antes do código: lista de participantes do STR (portal de dados

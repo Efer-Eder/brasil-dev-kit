@@ -29,9 +29,11 @@ and ISPB), area codes (DDD), national holidays and CNPJ (company tax ID) validat
 came from, every error has a stable code, and nothing depends on a paid key.
 
 > [!NOTE]
-> **Work in progress.** The SDK is not on npm yet (use it from source) and the API
-> is free, with no availability guarantee. This README only shows what already
-> exists; the rest is in the [ROADMAP](ROADMAP.md).
+> **v0.1.0 is on npm** (`npm install brasil-dev-kit`), with CEP, IBGE, holidays and
+> CNPJ. Banks and DDD are already in the public API and in the source, and ship in the
+> package with **0.2.0**; until then, use them from source. The API is free, with no
+> availability guarantee. This README only shows what already exists; the rest is in
+> the [ROADMAP](ROADMAP.md).
 
 ## Try it now
 
@@ -73,11 +75,11 @@ matching the official sources. Module docs (pt-BR): [CEP](docs/cep.md) ·
 <a href="https://raw.githubusercontent.com/Efer-Eder/brasil-dev-kit/main/docs/assets/readme/sdk-en.gif"><img src="https://raw.githubusercontent.com/Efer-Eder/brasil-dev-kit/main/docs/assets/readme/sdk-en.gif" width="880" alt="Editor with a TypeScript example and its real output"></a>
 
 ```powershell
-git clone https://github.com/Efer-Eder/brasil-dev-kit.git
-cd brasil-dev-kit
-pnpm install
-pnpm build
+npm install brasil-dev-kit
 ```
+
+For banks and DDD before 0.2.0, build from source: `git clone`, `pnpm install` and
+`pnpm build`.
 
 ```ts
 import { createBrasilDevKit, NotFoundError } from 'brasil-dev-kit';
@@ -155,8 +157,8 @@ All of them extend `BrasilDevKitError`.
   `fetch`, `AbortSignal.any` and `structuredClone`; browsers and other runtimes that
   provide them may work but are **not tested** (in browsers, CEP and IBGE also depend
   on each provider's CORS policy).
-- ESM + CommonJS package with types and no runtime dependencies; **not on npm yet**
-  (prepared, see [docs/release.md](docs/release.md)).
+- ESM + CommonJS package with types and no runtime dependencies, published on npm
+  with provenance (v0.1.0; banks and DDD ship in 0.2.0).
 - CNPJ: format and check digits only, no registry lookup.
 - Banks: STR participants only; the Pix participants list has no stable source and is left out.
 - DDD: bundled table from the 2026-11-23 PGCN file (`PGCN_VERSAO`); Anatel changes

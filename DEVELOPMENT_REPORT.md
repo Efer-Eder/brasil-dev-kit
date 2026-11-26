@@ -218,3 +218,41 @@ do push, que aguarda aprovação).
     - `/v1/ddd/10` passou a 400 (`VALIDATION_ERROR`).
     - `/v1/bancos/999` e `/v1/ddd/29` seguem em 404, agora com o JSON da própria API.
   - `/v1/openapi.json` no ar com 14 paths, entre eles os 6 novos; o índice `/` lista as rotas novas.
+
+## 9. Publicação da v0.1.0 no npm (2026-11-26)
+
+| Verificação               | Resultado                                                                                                        |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Workflow `Release (npm)`  | run 45861980213 na tag `v0.1.0`, `workflow_dispatch`, sucesso (token temporário)                                 |
+| `npm view brasil-dev-kit` | `latest` = 0.1.0; versões `0.0.0-stage` (16:47:53 UTC) e `0.1.0` (16:50:31 UTC)                                  |
+| Proveniência              | SLSA v1 (`https://slsa.dev/provenance/v1`) do commit `cfcd43f`; `npm audit signatures`: 1 attestation verificada |
+| Conteúdo do pacote        | 11 arquivos, com `README.md` e `README.en.md`                                                                    |
+| Consumidor limpo          | `npm i brasil-dev-kit` com dist, READMEs, LICENSE e CHANGELOG; `cnpj.validate` OK                                |
+| GitHub Release            | v0.1.0 publicado em 2026-11-26 16:52 UTC                                                                         |
+
+**README ausente no site do npm.** A página `npmjs.com/package/brasil-dev-kit` mostra
+"This package does not have a README". Conferido em 2026-11-26:
+
+- o tarball da 0.1.0 tem `README.md` (10,1 kB);
+- o documento do pacote no registro (`registry.npmjs.org/brasil-dev-kit`) já traz
+  `readme` com 10031 caracteres e `readmeFilename: README.md`;
+- os manifestos de versão (`0.0.0-stage` e `0.1.0`) vêm sem o campo `readme`, que é
+  o normal hoje.
+
+Conclusão: o dado está certo no registro. O site do npm ficou com a página
+gerada na primeira publicação, a do marcador `0.0.0-stage`, que tem só 2 arquivos e
+nenhum README, e não a atualizou. Esta é uma inferência: não há documentação do npm
+sobre esse comportamento com o staged publishing. Não há como forçar a atualização
+sem publicar de novo; a expectativa é que a 0.2.0 corrija a página. Se não corrigir,
+abrir chamado no suporte do npm.
+
+**Pendente (Efer):**
+
+- apagar o segredo `NPM_BOOTSTRAP_TOKEN` do repositório;
+- revogar o token no npm;
+- configurar o publicador confiável (`Efer-Eder` / `brasil-dev-kit` / `release.yml`).
+
+Opcional: marcar `0.0.0-stage` como obsoleta com `npm deprecate`, se o npm não
+esconder o marcador.
+
+Próxima versão: **0.2.0**, com bancos e DDD.

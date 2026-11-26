@@ -6,8 +6,12 @@ SDK and the public API in English.
 
 ## Install
 
-The package is prepared for npm but **not published yet**. Until then, build it
-from source:
+```bash
+npm install brasil-dev-kit
+```
+
+Version 0.1.0 (ESM and CommonJS, with types, no runtime dependencies) has CEP, IBGE,
+holidays and CNPJ. Banks and DDD ship in 0.2.0; to use them now, build from source:
 
 ```bash
 git clone https://github.com/Efer-Eder/brasil-dev-kit.git
@@ -15,9 +19,6 @@ cd brasil-dev-kit
 pnpm install
 pnpm build
 ```
-
-Once published, it will be `npm install brasil-dev-kit` (ESM and CommonJS, with
-types). No runtime dependencies.
 
 ## Quickstart
 
@@ -142,7 +143,7 @@ or critical use, run the SDK in your own service.
 - Holidays: only national holidays and federal optional days off.
 - Banks: STR participants only (no Pix list). DDD: bundled table, updated with new
   package versions.
-- Not on npm yet; the API has no SLA.
+- The API has no SLA.
 
 ## FAQ
 

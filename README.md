@@ -30,9 +30,10 @@ resposta diz de onde veio o dado, todo erro tem um código estável e nada depen
 de chave paga.
 
 > [!NOTE]
-> **Em desenvolvimento.** O SDK ainda não está no npm (use a partir do código) e a
-> API é gratuita, sem garantia de disponibilidade. Este README só mostra o que já
-> existe; o resto está no [ROADMAP](ROADMAP.md).
+> **v0.1.0 no npm** (`npm install brasil-dev-kit`), com CEP, IBGE, feriados e CNPJ.
+> Bancos e DDD já estão na API pública e no código, e entram no pacote na **0.2.0**;
+> até lá, use a partir do código. A API é gratuita, sem garantia de disponibilidade.
+> Este README só mostra o que já existe; o resto está no [ROADMAP](ROADMAP.md).
 
 ## Experimente agora
 
@@ -73,11 +74,11 @@ Detalhes e fontes de cada módulo: [CEP](docs/cep.md) · [IBGE](docs/ibge.md) ·
 <a href="https://raw.githubusercontent.com/Efer-Eder/brasil-dev-kit/main/docs/assets/readme/sdk-pt.gif"><img src="https://raw.githubusercontent.com/Efer-Eder/brasil-dev-kit/main/docs/assets/readme/sdk-pt.gif" width="880" alt="Editor com exemplo em TypeScript e a saída real ao lado"></a>
 
 ```powershell
-git clone https://github.com/Efer-Eder/brasil-dev-kit.git
-cd brasil-dev-kit
-pnpm install
-pnpm build
+npm install brasil-dev-kit
 ```
+
+Para bancos e DDD antes da 0.2.0, use a partir do código: `git clone`, `pnpm install`
+e `pnpm build`.
 
 ```ts
 import { createBrasilDevKit, NotFoundError } from 'brasil-dev-kit';
@@ -155,8 +156,8 @@ Todos herdam de `BrasilDevKitError`.
   `AbortSignal.any` e `structuredClone`; navegadores e outros runtimes com essas APIs
   podem funcionar, mas **não são testados** (no navegador, CEP e IBGE também dependem
   do CORS de cada provedor).
-- Pacote ESM + CommonJS com tipos, sem dependências de runtime; ainda **não publicado
-  no npm** (preparado, ver [docs/release.md](docs/release.md)).
+- Pacote ESM + CommonJS com tipos, sem dependências de runtime, publicado no npm com
+  proveniência (v0.1.0; bancos e DDD entram na 0.2.0).
 - CNPJ: só formato e dígitos verificadores, sem consulta cadastral.
 - CEP: dados do ViaCEP e da BrasilAPI, que podem divergir e limitar uso massivo.
 - Feriados: só nacionais e pontos facultativos federais; estaduais e municipais não.
