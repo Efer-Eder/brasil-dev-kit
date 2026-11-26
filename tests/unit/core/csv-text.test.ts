@@ -38,7 +38,7 @@ describe('createHttpClient().getText', () => {
   const textFetch = (body: string, status = 200): FetchLike & { accept: string[] } => {
     const accept: string[] = [];
     const fetch = (async (_url, init) => {
-      accept.push(String((init?.headers as Record<string, string>).accept));
+      accept.push(String((init.headers as Record<string, string>).accept));
       return new Response(body, { status });
     }) as FetchLike & { accept: string[] };
     fetch.accept = accept;

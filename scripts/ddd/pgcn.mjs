@@ -59,7 +59,8 @@ export function unzipEntry(zip, name) {
 
 /** CSV do PGCN → linhas vigentes `{ codigoIbge, uf, municipio, ddd }`, validadas. */
 export function parsePgcnCsv(text) {
-  const lines = text.replace(/^﻿/, '').split(/\r?\n/).filter((l) => l.trim() !== '');
+  const semBom = text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
+  const lines = semBom.split(/\r?\n/).filter((l) => l.trim() !== '');
   const header = splitLine(lines[0] ?? '');
   if (HEADER.some((h, i) => header[i] !== h)) {
     throw new Error(`cabeçalho do PGCN mudou: ${header.join(';')}`);
