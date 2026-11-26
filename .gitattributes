@@ -3,3 +3,5 @@
 tests/fixtures/cep/viacep/** -text
 tests/fixtures/cep/brasilapi/** -text
 tests/fixtures/ibge/api/** -text
+tests/fixtures/bancos/bcb/** -text
+tests/fixtures/ddd/anatel/** binary
