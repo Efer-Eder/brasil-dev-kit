@@ -2,14 +2,19 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import openapi from '../../docs/openapi.json' with { type: 'json' };
 import pkg from '../../package.json' with { type: 'json' };
 import {
+  type BancosClient,
   type CepClient,
+  createBancosClient,
   createCepClient,
   createIbgeClient,
   type Endereco,
   type FetchLike,
+  getDdd,
+  getDddPorMunicipio,
   getFeriadosNacionais,
   HttpError,
   type IbgeClient,
+  listDdds,
   type Municipio,
   NotFoundError,
   normalizeCep,
@@ -93,6 +98,12 @@ export function createApp(deps: AppDeps): App {
   };
   const cep: CepClient = createCepClient(clientOptions);
   const ibge: IbgeClient = createIbgeClient(clientOptions);
+  // A lista inteira vem num arquivo só; o cache do cliente (com junção de pedidos
+  // simultâneos) faz uma leitura por período, qualquer que seja a rota.
+  const bancos: BancosClient = createBancosClient({
+    ...clientOptions,
+    cacheTtlMs: config.bancos.ttlMs,
+  });
 
   const github = createGithubCache({
     repo: config.github.repo,
@@ -181,12 +192,18 @@ export function createApp(deps: AppDeps): App {
           municipios: '/v1/ibge/ufs/{uf}/municipios',
           cnpj: '/v1/cnpj/{cnpj}',
           feriados: '/v1/feriados/{ano}',
+          bancos: '/v1/bancos',
+          banco: '/v1/bancos/{codigo}',
+          bancoPorIspb: '/v1/bancos/ispb/{ispb}',
+          ddds: '/v1/ddd',
+          ddd: '/v1/ddd/{ddd}',
+          dddPorMunicipio: '/v1/ddd/municipio/{codigoIbge}',
           github: '/v1/projeto/github',
           saude: '/v1/health',
           openapi: '/v1/openapi.json',
         },
         aviso:
-          'Serviço gratuito, sem garantia de disponibilidade. Dados de CEP vêm do ViaCEP/BrasilAPI, de UFs/municípios do IBGE e de feriados das leis federais e portarias do governo federal, com cache.',
+          'Serviço gratuito, sem garantia de disponibilidade. Dados de CEP vêm do ViaCEP/BrasilAPI, de UFs/municípios do IBGE, de bancos da lista de participantes do STR do Banco Central, de DDD do PGCN da Anatel e de feriados das leis federais e portarias do governo federal, com cache.',
       },
       headers: { 'cache-control': CACHE_HOUR },
     };
@@ -250,6 +267,45 @@ export function createApp(deps: AppDeps): App {
           }
         : result;
       return { status: 200, body, headers: { 'cache-control': CACHE_DAY } };
+    }
+    if (resource === 'bancos') {
+      if (rest.length === 0) {
+        return { status: 200, body: await bancos.list(), headers: { 'cache-control': CACHE_HOUR } };
+      }
+      const banco =
+        rest.length === 2 && rest[0] === 'ispb' && rest[1] !== undefined
+          ? await bancos.getByIspb(rest[1])
+          : rest.length === 1 && rest[0] !== undefined
+            ? await bancos.getByCodigo(rest[0])
+            : undefined;
+      if (banco === null) {
+        return errorReply(
+          404,
+          'NOT_FOUND',
+          'Banco não encontrado na lista de participantes do STR.',
+          {
+            'cache-control': CACHE_HOUR,
+          },
+        );
+      }
+      if (banco) return { status: 200, body: banco, headers: { 'cache-control': CACHE_HOUR } };
+    }
+    if (resource === 'ddd') {
+      if (rest.length === 0) {
+        return { status: 200, body: listDdds(), headers: { 'cache-control': CACHE_DAY } };
+      }
+      const found =
+        rest.length === 2 && rest[0] === 'municipio' && rest[1] !== undefined
+          ? getDddPorMunicipio(rest[1])
+          : rest.length === 1 && rest[0] !== undefined
+            ? getDdd(rest[0])
+            : undefined;
+      if (found === null) {
+        return errorReply(404, 'NOT_FOUND', 'DDD não está em uso ou município não encontrado.', {
+          'cache-control': CACHE_DAY,
+        });
+      }
+      if (found) return { status: 200, body: found, headers: { 'cache-control': CACHE_DAY } };
     }
     if (resource === 'ibge' && rest[0] === 'ufs') {
       if (rest.length === 1) return cachedIbge('ufs', () => ibge.listUfs());

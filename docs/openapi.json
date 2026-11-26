@@ -34,6 +34,14 @@
       "description": "Validação de formato e dígitos verificadores, sem consulta cadastral."
     },
     {
+      "name": "Bancos",
+      "description": "Participantes do STR (código COMPE e ISPB), da lista diária do Banco Central."
+    },
+    {
+      "name": "DDD",
+      "description": "Códigos Nacionais (DDD) do PGCN da Anatel, tabela embutida."
+    },
+    {
       "name": "Meta",
       "description": "Saúde da API, especificação e resumo do repositório."
     }
@@ -252,6 +260,247 @@
                 }
               }
             }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimit"
+          }
+        }
+      }
+    },
+    "/v1/bancos": {
+      "get": {
+        "operationId": "listarBancos",
+        "tags": ["Bancos"],
+        "summary": "Lista os participantes do STR",
+        "description": "Lista completa, na ordem do arquivo oficial (por ISPB). Participantes sem código de compensação vêm com `codigo: null`. Fonte: https://dadosabertos.bcb.gov.br/dataset/lista-de-participantes-do-str (ODbL).",
+        "responses": {
+          "200": {
+            "description": "Participantes do STR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Banco"
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimit"
+          },
+          "502": {
+            "$ref": "#/components/responses/ProviderUnavailable"
+          },
+          "503": {
+            "$ref": "#/components/responses/Busy"
+          },
+          "504": {
+            "$ref": "#/components/responses/Timeout"
+          }
+        }
+      }
+    },
+    "/v1/bancos/{codigo}": {
+      "get": {
+        "operationId": "buscarBancoPorCodigo",
+        "tags": ["Bancos"],
+        "summary": "Banco pelo código de compensação (COMPE)",
+        "parameters": [
+          {
+            "name": "codigo",
+            "in": "path",
+            "required": true,
+            "description": "De 1 a 3 dígitos; `1` e `001` são o mesmo código.",
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{1,3}$",
+              "examples": ["001", "260"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Participante.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Banco"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimit"
+          },
+          "502": {
+            "$ref": "#/components/responses/ProviderUnavailable"
+          },
+          "503": {
+            "$ref": "#/components/responses/Busy"
+          },
+          "504": {
+            "$ref": "#/components/responses/Timeout"
+          }
+        }
+      }
+    },
+    "/v1/bancos/ispb/{ispb}": {
+      "get": {
+        "operationId": "buscarBancoPorIspb",
+        "tags": ["Bancos"],
+        "summary": "Banco pelo ISPB",
+        "parameters": [
+          {
+            "name": "ispb",
+            "in": "path",
+            "required": true,
+            "description": "De 1 a 8 dígitos; zeros à esquerda podem faltar.",
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{1,8}$",
+              "examples": ["00000000", "18236120"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Participante.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Banco"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimit"
+          },
+          "502": {
+            "$ref": "#/components/responses/ProviderUnavailable"
+          },
+          "503": {
+            "$ref": "#/components/responses/Busy"
+          },
+          "504": {
+            "$ref": "#/components/responses/Timeout"
+          }
+        }
+      }
+    },
+    "/v1/ddd": {
+      "get": {
+        "operationId": "listarDdds",
+        "tags": ["DDD"],
+        "summary": "DDDs em uso",
+        "responses": {
+          "200": {
+            "description": "DDDs em ordem crescente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DddResumo"
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimit"
+          }
+        }
+      }
+    },
+    "/v1/ddd/{ddd}": {
+      "get": {
+        "operationId": "buscarDdd",
+        "tags": ["DDD"],
+        "summary": "Municípios e UFs de um DDD",
+        "description": "Alguns DDDs cruzam a divisa entre UFs (ex.: 61 atende DF e GO). Código com formato válido mas sem uso responde 404.",
+        "parameters": [
+          {
+            "name": "ddd",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^0?[1-9][1-9]$",
+              "examples": ["11", "61"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "DDD e municípios.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ddd"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimit"
+          }
+        }
+      }
+    },
+    "/v1/ddd/municipio/{codigoIbge}": {
+      "get": {
+        "operationId": "buscarDddPorMunicipio",
+        "tags": ["DDD"],
+        "summary": "DDD de um município",
+        "parameters": [
+          {
+            "name": "codigoIbge",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{7}$",
+              "examples": ["3550308"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "DDD do município.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DddDoMunicipio"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           },
           "429": {
             "$ref": "#/components/responses/RateLimit"
@@ -725,6 +974,164 @@
             }
           }
         ]
+      },
+      "Banco": {
+        "type": "object",
+        "required": [
+          "ispb",
+          "codigo",
+          "nomeReduzido",
+          "nome",
+          "participaCompe",
+          "acessoPrincipal",
+          "inicioOperacao",
+          "fonte"
+        ],
+        "properties": {
+          "ispb": {
+            "type": "string",
+            "pattern": "^\\d{8}$",
+            "examples": ["18236120"]
+          },
+          "codigo": {
+            "type": ["string", "null"],
+            "pattern": "^\\d{3}$",
+            "description": "`null` quando o arquivo traz `n/a` ou `0`.",
+            "examples": ["260"]
+          },
+          "nomeReduzido": {
+            "type": "string",
+            "examples": ["NU PAGAMENTOS - IP"]
+          },
+          "nome": {
+            "type": "string"
+          },
+          "participaCompe": {
+            "type": "boolean"
+          },
+          "acessoPrincipal": {
+            "type": "string",
+            "examples": ["RSFN", "Internet"]
+          },
+          "inicioOperacao": {
+            "type": "string",
+            "format": "date"
+          },
+          "fonte": {
+            "type": "object",
+            "required": ["provedor", "servicoOrigem", "url"],
+            "properties": {
+              "provedor": {
+                "const": "bcb"
+              },
+              "servicoOrigem": {
+                "const": "participantes-str"
+              },
+              "url": {
+                "type": "string",
+                "format": "uri"
+              }
+            }
+          }
+        }
+      },
+      "MunicipioDdd": {
+        "type": "object",
+        "required": ["codigoIbge", "nome", "uf"],
+        "properties": {
+          "codigoIbge": {
+            "type": "string",
+            "pattern": "^\\d{7}$"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "uf": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$"
+          }
+        }
+      },
+      "FonteDdd": {
+        "type": "object",
+        "required": ["provedor", "servicoOrigem", "atualizadoEm", "url"],
+        "properties": {
+          "provedor": {
+            "const": "anatel"
+          },
+          "servicoOrigem": {
+            "const": "pgcn"
+          },
+          "atualizadoEm": {
+            "type": "string",
+            "format": "date",
+            "description": "Data do arquivo oficial usado na tabela."
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      },
+      "Ddd": {
+        "type": "object",
+        "required": ["ddd", "ufs", "municipios", "fonte"],
+        "properties": {
+          "ddd": {
+            "type": "string",
+            "examples": ["61"]
+          },
+          "ufs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "examples": [["DF", "GO"]]
+          },
+          "municipios": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MunicipioDdd"
+            }
+          },
+          "fonte": {
+            "$ref": "#/components/schemas/FonteDdd"
+          }
+        }
+      },
+      "DddResumo": {
+        "type": "object",
+        "required": ["ddd", "ufs", "totalMunicipios"],
+        "properties": {
+          "ddd": {
+            "type": "string"
+          },
+          "ufs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "totalMunicipios": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "DddDoMunicipio": {
+        "type": "object",
+        "required": ["ddd", "municipio", "fonte"],
+        "properties": {
+          "ddd": {
+            "type": "string"
+          },
+          "municipio": {
+            "$ref": "#/components/schemas/MunicipioDdd"
+          },
+          "fonte": {
+            "$ref": "#/components/schemas/FonteDdd"
+          }
+        }
       }
     }
   }
