@@ -61,7 +61,8 @@
     "check": "pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:coverage": "vitest run --coverage",
-    "test:package": "node scripts/check-package.mjs"
+    "test:package": "node scripts/check-package.mjs",
+    "data:ddd": "node scripts/ddd/generate.mjs && biome format --write src/modules/ddd/dados.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.8",
