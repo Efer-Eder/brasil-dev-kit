@@ -45,6 +45,8 @@ curl https://efer.online/api/brasil-dev-kit/v1/cep/01310-100
 curl https://efer.online/api/brasil-dev-kit/v1/feriados/2026
 curl https://efer.online/api/brasil-dev-kit/v1/ibge/ufs/SP/municipios
 curl https://efer.online/api/brasil-dev-kit/v1/cnpj/12ABC34501DE35
+curl https://efer.online/api/brasil-dev-kit/v1/bancos/260
+curl https://efer.online/api/brasil-dev-kit/v1/ddd/61
 ```
 
 Prefere clicar? A [página do projeto](https://efer.online/projeto/brasil-dev-kit/)
@@ -119,6 +121,9 @@ Base: **`https://efer.online/api/brasil-dev-kit/`**
 | `GET /v1/ibge/ufs/{uf}/municipios` | Municípios da UF (sigla ou código) |
 | `GET /v1/feriados/{ano}`           | Feriados e pontos facultativos     |
 | `GET /v1/cnpj/{cnpj}`              | Validação de CNPJ                  |
+| `GET /v1/bancos/{codigo}`          | Banco pelo código COMPE            |
+| `GET /v1/bancos/ispb/{ispb}`       | Banco pelo ISPB                    |
+| `GET /v1/ddd/{ddd}`                | Municípios e UFs do DDD            |
 | `GET /v1/health`                   | Saúde da API                       |
 
 | Limite               | Valor                                                     |

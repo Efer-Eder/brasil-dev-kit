@@ -44,6 +44,8 @@ curl https://efer.online/api/brasil-dev-kit/v1/cep/01310-100
 curl https://efer.online/api/brasil-dev-kit/v1/feriados/2026
 curl https://efer.online/api/brasil-dev-kit/v1/ibge/ufs/SP/municipios
 curl https://efer.online/api/brasil-dev-kit/v1/cnpj/12ABC34501DE35
+curl https://efer.online/api/brasil-dev-kit/v1/bancos/260
+curl https://efer.online/api/brasil-dev-kit/v1/ddd/61
 ```
 
 Rather click? The [project page](https://efer.online/projeto/brasil-dev-kit/) has a
@@ -119,6 +121,9 @@ Base: **`https://efer.online/api/brasil-dev-kit/`**
 | `GET /v1/ibge/ufs/{uf}/municipios` | Municipalities of a state (code or abbreviation) |
 | `GET /v1/feriados/{ano}`           | Holidays and optional days off                   |
 | `GET /v1/cnpj/{cnpj}`              | CNPJ validation                                  |
+| `GET /v1/bancos/{codigo}`          | Bank by COMPE code                               |
+| `GET /v1/bancos/ispb/{ispb}`       | Bank by ISPB                                     |
+| `GET /v1/ddd/{ddd}`                | Municipalities and states for a DDD              |
 | `GET /v1/health`                   | API health                                       |
 
 | Limit                | Value                                                    |
