@@ -23,9 +23,9 @@ function routed(routes: Record<string, { body: string; status?: number }>) {
 }
 
 describe('createBrasilDevKit', () => {
-  it('expõe os quatro módulos e é imutável', () => {
+  it('expõe os seis módulos e é imutável', () => {
     const br = createBrasilDevKit({ fetch: routed({}).fetch });
-    expect(Object.keys(br).sort()).toEqual(['cep', 'cnpj', 'feriados', 'ibge']);
+    expect(Object.keys(br).sort()).toEqual(['bancos', 'cep', 'cnpj', 'ddd', 'feriados', 'ibge']);
     expect(Object.isFrozen(br)).toBe(true);
     expect(Object.isFrozen(br.cnpj)).toBe(true);
   });
@@ -96,5 +96,31 @@ describe('createBrasilDevKit: etapas do CNPJ', () => {
     expect(br.cnpj.checkSyntax('12ABC34501DE36')).toMatchObject({ valid: true });
     expect(br.cnpj.hasValidCheckDigits('12ABC34501DE36')).toBe(false);
     expect(br.cnpj.format('12ABC34501DE36', { checkDigits: false })).toBe('12.ABC.345/01DE-36');
+  });
+});
+
+describe('createBrasilDevKit: bancos e DDD', () => {
+  const STR = 'https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv';
+
+  it('bancos usa o fetch comum e o cache padrão do módulo', async () => {
+    const { fetch, calls } = routed({
+      [STR]: { body: fixture('bancos/bcb/ParticipantesSTR.csv') },
+    });
+    const br = createBrasilDevKit({ fetch });
+    expect((await br.bancos.getByCodigo('341'))?.ispb).toBe('60701190');
+    expect((await br.bancos.getByIspb('18236120'))?.codigo).toBe('260');
+    expect(calls).toEqual([STR]);
+  });
+
+  it('DDD funciona sem rede', () => {
+    const fetch: FetchLike = async () => {
+      throw new Error('não deveria usar a rede');
+    };
+    const br = createBrasilDevKit({ fetch });
+    expect(br.ddd.get('61')?.ufs).toEqual(['DF', 'GO']);
+    expect(br.ddd.getPorMunicipio('3550308')?.ddd).toBe('11');
+    expect(br.ddd.isValido('(21)')).toBe(true);
+    expect(br.ddd.normalize('011')).toBe('11');
+    expect(br.ddd.list({ uf: 'AC' })).toEqual([{ ddd: '68', ufs: ['AC'], totalMunicipios: 22 }]);
   });
 });
