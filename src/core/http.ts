@@ -78,7 +78,14 @@ export interface HttpClient {
    * Quem chama é responsável por validar o formato antes de usar os dados.
    */
   getJson(path: string, options?: RequestOptions): Promise<unknown>;
+  /**
+   * Executa um GET e devolve o corpo como texto (CSV, por exemplo), sem BOM inicial.
+   * Mesmas regras de timeout, retry, cache e erros do `getJson`.
+   */
+  getText(path: string, options?: RequestOptions): Promise<string>;
 }
+
+type BodyKind = 'json' | 'text';
 
 export const DEFAULT_TIMEOUT_MS = 8000;
 export const DEFAULT_RETRY: Required<RetryOptions> = Object.freeze({
@@ -102,6 +109,7 @@ export function createHttpClient(options: HttpClientOptions = {}): HttpClient {
     url: string,
     timeoutMs: number,
     headers: Record<string, string>,
+    kind: BodyKind,
     callerSignal?: AbortSignal,
   ) {
     const timeoutController = new AbortController();
@@ -119,6 +127,7 @@ export function createHttpClient(options: HttpClientOptions = {}): HttpClient {
       if (!response.ok) {
         throw await errorFromResponse(response, url, provider);
       }
+      if (kind === 'text') return stripBom(await response.text());
       return await parseJsonBody(response, url, provider);
     } catch (error) {
       if (callerSignal?.aborted) throw callerSignal.reason;
@@ -137,11 +146,12 @@ export function createHttpClient(options: HttpClientOptions = {}): HttpClient {
     url: string,
     timeoutMs: number,
     headers: Record<string, string>,
+    kind: BodyKind,
     callerSignal?: AbortSignal,
   ): Promise<unknown> {
     for (let n = 0; ; n++) {
       try {
-        return await attempt(url, timeoutMs, headers, callerSignal);
+        return await attempt(url, timeoutMs, headers, kind, callerSignal);
       } catch (error) {
         if (callerSignal?.aborted) throw callerSignal.reason;
         const wait = n < retry.retries ? retryDelay(error, n, retry) : undefined;
@@ -151,38 +161,51 @@ export function createHttpClient(options: HttpClientOptions = {}): HttpClient {
     }
   }
 
+  async function get(
+    path: string,
+    requestOptions: RequestOptions,
+    kind: BodyKind,
+  ): Promise<unknown> {
+    const timeoutMs = requestOptions.timeoutMs ?? defaultTimeout;
+    assertValidTimeout(timeoutMs);
+
+    const callerSignal = requestOptions.signal;
+    callerSignal?.throwIfAborted();
+
+    const url = buildUrl(options.baseUrl, path, requestOptions.query);
+    const headers: Record<string, string> = {
+      accept: kind === 'json' ? 'application/json' : 'text/csv, text/plain;q=0.9, */*;q=0.8',
+      ...lowerCaseKeys(options.headers),
+      ...lowerCaseKeys(requestOptions.headers),
+    };
+    if (options.userAgent) headers['user-agent'] = options.userAgent;
+
+    if (!cache) return withRetries(url, timeoutMs, headers, kind, callerSignal);
+
+    const key = `${kind} ${url}`;
+    const hit = cache.get(key);
+    if (hit.found) return hit.value;
+
+    // Pedidos simultâneos da mesma URL compartilham uma única ida à rede.
+    let shared = inFlight.get(key);
+    if (!shared) {
+      shared = withRetries(url, timeoutMs, headers, kind).finally(() => inFlight.delete(key));
+      inFlight.set(key, shared);
+      shared.then((value) => cache.set(key, value)).catch(() => undefined);
+    }
+    const value = await (callerSignal ? raceAbort(shared, callerSignal) : shared);
+    return structuredClone(value);
+  }
+
   return {
-    async getJson(path, requestOptions = {}) {
-      const timeoutMs = requestOptions.timeoutMs ?? defaultTimeout;
-      assertValidTimeout(timeoutMs);
-
-      const callerSignal = requestOptions.signal;
-      callerSignal?.throwIfAborted();
-
-      const url = buildUrl(options.baseUrl, path, requestOptions.query);
-      const headers: Record<string, string> = {
-        accept: 'application/json',
-        ...lowerCaseKeys(options.headers),
-        ...lowerCaseKeys(requestOptions.headers),
-      };
-      if (options.userAgent) headers['user-agent'] = options.userAgent;
-
-      if (!cache) return withRetries(url, timeoutMs, headers, callerSignal);
-
-      const hit = cache.get(url);
-      if (hit.found) return hit.value;
-
-      // Pedidos simultâneos da mesma URL compartilham uma única ida à rede.
-      let shared = inFlight.get(url);
-      if (!shared) {
-        shared = withRetries(url, timeoutMs, headers).finally(() => inFlight.delete(url));
-        inFlight.set(url, shared);
-        shared.then((value) => cache.set(url, value)).catch(() => undefined);
-      }
-      const value = await (callerSignal ? raceAbort(shared, callerSignal) : shared);
-      return structuredClone(value);
-    },
+    getJson: (path, requestOptions = {}) => get(path, requestOptions, 'json'),
+    getText: async (path, requestOptions = {}) =>
+      (await get(path, requestOptions, 'text')) as string,
   };
+}
+
+function stripBom(text: string): string {
+  return text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
 }
 
 function resolveRetry(retry: RetryOptions | false | undefined): Required<RetryOptions> {

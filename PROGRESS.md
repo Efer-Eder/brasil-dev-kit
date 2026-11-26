@@ -1,5 +1,21 @@
 # Progresso
 
+## 2026-11-26 — Etapa 10: bancos e DDD
+
+- Fontes conferidas antes do código: lista de participantes do STR (portal de dados
+  abertos do Banco Central, ODbL, atualização diária) e PGCN da Anatel (dados.gov.br,
+  domínio público, arquivo de 23/11/2026). A lista do Pix ficou de fora por não ter
+  URL estável nem entrada no portal (registrado no ROADMAP).
+- `src/modules/bancos/` e `src/providers/bcb.ts`: CSV oficial validado linha a
+  linha, busca por código e ISPB, cache de 1 hora.
+- `src/modules/ddd/`: tabela gerada por `scripts/ddd/generate.mjs` a partir do ZIP
+  oficial (leitor de ZIP sem dependências); teste unitário compara a tabela com a
+  fixture município a município, e o de integração com o arquivo do dia.
+- Core: `getText` e leitor de CSV. Fachada e API com as rotas novas; OpenAPI
+  válida no Redocly.
+- Fixtures sem alteração, com origem, data, tamanho e licença em
+  `tests/fixtures/bancos/README.md` e `tests/fixtures/ddd/README.md`.
+
 ## 2026-11-20 — Etapa 9: fachada createBrasilDevKit()
 
 - `src/kit.ts`: `createBrasilDevKit(options)` devolve um objeto imutável com

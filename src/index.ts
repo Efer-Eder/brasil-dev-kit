@@ -30,6 +30,17 @@ export {
   createBrasilDevKit,
 } from './kit.js';
 export {
+  BANCOS_DEFAULT_CACHE_TTL_MS,
+  type Banco,
+  type BancosClient,
+  type BancosClientOptions,
+  type BancosRequestOptions,
+  createBancosClient,
+  type FonteBanco,
+  normalizeCodigoBanco,
+  normalizeIspb,
+} from './modules/bancos/index.js';
+export {
   assertCep,
   type CepClient,
   type CepClientOptions,
@@ -56,6 +67,19 @@ export {
   validateCnpj,
   validateCnpjSyntax,
 } from './modules/cnpj/index.js';
+export {
+  type Ddd,
+  type DddDoMunicipio,
+  type DddResumo,
+  type FonteDdd,
+  getDdd,
+  getDddPorMunicipio,
+  isDddValido,
+  listDdds,
+  type MunicipioDdd,
+  normalizeDdd,
+  PGCN_VERSAO,
+} from './modules/ddd/index.js';
 export {
   ANO_MAXIMO,
   ANO_MINIMO,

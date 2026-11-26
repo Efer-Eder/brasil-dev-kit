@@ -7,6 +7,22 @@ projeto adota o [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Unreleased]
 
+### Adicionado
+
+- Bancos: `createBancosClient()` com `getByCodigo` (COMPE), `getByIspb` e `list`, a
+  partir da lista oficial de participantes do STR do Banco Central (arquivo diário,
+  ODbL). Lista em cache por 1 hora por padrão; `codigo: null` para participantes
+  sem código de compensação. Também `normalizeCodigoBanco` e `normalizeIspb`.
+- DDD: `getDdd`, `listDdds`, `getDddPorMunicipio`, `isDddValido` e `normalizeDdd`,
+  com tabela embutida gerada do PGCN da Anatel (domínio público, arquivo de
+  23/11/2026, 5571 municípios, 67 DDDs) e `PGCN_VERSAO`. Script `pnpm data:ddd`
+  para regenerar a tabela.
+- Fachada: `br.bancos` e `br.ddd`; opção `bancos` em `createBrasilDevKit`.
+- Core: `HttpClient.getText` (mesmo timeout, retry, cache e erros do `getJson`)
+  e leitor de CSV interno.
+- API: `/v1/bancos`, `/v1/bancos/{codigo}`, `/v1/bancos/ispb/{ispb}`, `/v1/ddd`,
+  `/v1/ddd/{ddd}` e `/v1/ddd/municipio/{codigoIbge}`, na especificação OpenAPI.
+
 ## [0.1.0] - 2026-11-21
 
 Primeira versão publicada no npm.

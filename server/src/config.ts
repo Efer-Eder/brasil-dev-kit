@@ -22,6 +22,10 @@ export interface ServerConfig {
   ibge: {
     ttlMs: number;
   };
+  bancos: {
+    /** Tempo de vida da lista de participantes do STR (o BC atualiza 1 vez por dia). */
+    ttlMs: number;
+  };
   github: {
     /** Repositório exibido no widget da página do projeto (`dono/nome`). */
     repo: string;
@@ -48,6 +52,7 @@ export const DEFAULT_CONFIG: ServerConfig = {
   upstreamTimeoutMs: 4_000,
   cep: { maxEntries: 50_000, ttlFoundMs: 7 * DAY, ttlNotFoundMs: 6 * HOUR },
   ibge: { ttlMs: DAY },
+  bancos: { ttlMs: HOUR },
   github: { repo: 'Efer-Eder/brasil-dev-kit', ttlMs: 10 * 60 * 1000 },
   upstream: { maxConcurrent: 4, maxQueue: 16, ratePerSecond: 4, burst: 8 },
 };
@@ -78,6 +83,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
       ttlNotFoundMs: readInt(env, 'CEP_CACHE_TTL_NOT_FOUND_MS', d.cep.ttlNotFoundMs),
     },
     ibge: { ttlMs: readInt(env, 'IBGE_CACHE_TTL_MS', d.ibge.ttlMs) },
+    bancos: { ttlMs: readInt(env, 'BANCOS_CACHE_TTL_MS', d.bancos.ttlMs) },
     github: {
       repo: env.GITHUB_REPO && env.GITHUB_REPO !== '' ? env.GITHUB_REPO : d.github.repo,
       ttlMs: readInt(env, 'GITHUB_CACHE_TTL_MS', d.github.ttlMs),

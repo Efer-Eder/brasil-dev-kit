@@ -25,6 +25,13 @@ verificação das fontes oficiais.
 
 ## Depois do MVP
 
-Bancos (COMPE/ISPB), DDD, normalização de telefone, CPF (revisar finalidade e
+- [x] Bancos (COMPE/ISPB) pela lista de participantes do STR do Banco Central
+- [x] DDD pelo PGCN da Anatel (tabela embutida)
+- [ ] Participantes do Pix: **bloqueado**. O Banco Central publica a lista num CSV
+      com a data no nome (só o do dia fica no ar), sem entrada no portal de dados
+      abertos; só dá para achar o arquivo por APIs internas do site, sem
+      documentação. Entra quando houver URL estável e documentada.
+
+Normalização de telefone, CPF (revisar finalidade e
 tratamento de dados), CNPJ cadastral via fontes autorizadas, CLI, pacote MCP,
 múltiplos provedores com fallback e comparação de disponibilidade.

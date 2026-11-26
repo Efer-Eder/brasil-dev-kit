@@ -430,3 +430,68 @@ describe('API — OpenAPI', () => {
     expect(JSON.stringify(res.body).length).toBeLessThan(200);
   });
 });
+
+describe('API — bancos', () => {
+  const STR = 'https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.csv';
+
+  it('lista, busca por código e ISPB com uma leitura do arquivo do BC', async () => {
+    const { fetch, calls } = routedFetch({
+      [STR]: { body: fixture('bancos/bcb/ParticipantesSTR.csv') },
+    });
+    const { get } = await start(fetch);
+
+    const lista = await get('/v1/bancos');
+    expect(lista.status).toBe(200);
+    expect(lista.body).toHaveLength(473);
+
+    const nu = await get('/v1/bancos/260');
+    expect(nu.body).toMatchObject({ ispb: '18236120', codigo: '260', fonte: { provedor: 'bcb' } });
+    expect((await get('/v1/bancos/1')).body).toMatchObject({ codigo: '001' });
+    expect((await get('/v1/bancos/ispb/60701190')).body).toMatchObject({ codigo: '341' });
+    expect(calls).toEqual([STR]);
+  });
+
+  it('não encontrado → 404; formato inválido → 400 sem rede', async () => {
+    const { fetch, calls } = routedFetch({
+      [STR]: { body: fixture('bancos/bcb/ParticipantesSTR.csv') },
+    });
+    const { get } = await start(fetch);
+    expect((await get('/v1/bancos/999')).status).toBe(404);
+    expect((await get('/v1/bancos/ispb/99999999')).status).toBe(404);
+    expect(calls).toHaveLength(1);
+
+    const sem = await start(routedFetch({}).fetch);
+    expect((await sem.get('/v1/bancos/abcd')).status).toBe(400);
+    expect((await sem.get('/v1/bancos/ispb/123456789')).status).toBe(400);
+    expect((await sem.get('/v1/bancos/ispb/1/x')).status).toBe(404);
+  });
+
+  it('Banco Central fora do ar → 502', async () => {
+    const { get } = await start(routedFetch({ [STR]: { body: 'erro', status: 503 } }).fetch);
+    expect((await get('/v1/bancos/001')).status).toBe(502);
+  });
+});
+
+describe('API — DDD', () => {
+  it('lista, consulta DDD e município sem chamada externa', async () => {
+    const { fetch, calls } = routedFetch({});
+    const { get } = await start(fetch);
+
+    const lista = await get('/v1/ddd');
+    expect(lista.status).toBe(200);
+    expect(lista.body).toHaveLength(67);
+
+    const df = await get('/v1/ddd/61');
+    expect(df.body).toMatchObject({ ddd: '61', ufs: ['DF', 'GO'], fonte: { provedor: 'anatel' } });
+    expect((await get('/v1/ddd/municipio/3550308')).body).toMatchObject({ ddd: '11' });
+    expect(calls).toHaveLength(0);
+  });
+
+  it('sem uso → 404; formato inválido → 400', async () => {
+    const { get } = await start(routedFetch({}).fetch);
+    expect((await get('/v1/ddd/29')).status).toBe(404);
+    expect((await get('/v1/ddd/municipio/9999999')).status).toBe(404);
+    expect((await get('/v1/ddd/10')).status).toBe(400);
+    expect((await get('/v1/ddd/municipio/123')).status).toBe(400);
+  });
+});

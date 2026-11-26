@@ -5,16 +5,22 @@
 
 Base: **`https://efer.online/api/brasil-dev-kit/`**
 
-| Método | Rota                           | O que faz                                                   |
-| ------ | ------------------------------ | ----------------------------------------------------------- |
-| GET    | `/`                            | Índice com as rotas e o link desta documentação             |
-| GET    | `/v1/health`                   | Saúde da API                                                |
-| GET    | `/v1/cep/{cep}`                | Endereço do CEP (`01310100` ou `01310-100`)                 |
-| GET    | `/v1/ibge/ufs`                 | 27 UFs com região, ordenadas por nome                       |
-| GET    | `/v1/ibge/ufs/{uf}/municipios` | Municípios da UF (sigla `SP` ou código `35`), por nome      |
-| GET    | `/v1/cnpj/{cnpj}`              | Validação de formato e dígitos verificadores (sem consulta) |
-| GET    | `/v1/feriados/{ano}`           | Feriados nacionais e pontos facultativos federais do ano    |
-| GET    | `/v1/projeto/github`           | Resumo do repositório (estrelas, issues, PRs, commits, CI)  |
+| Método | Rota                             | O que faz                                                   |
+| ------ | -------------------------------- | ----------------------------------------------------------- |
+| GET    | `/`                              | Índice com as rotas e o link desta documentação             |
+| GET    | `/v1/health`                     | Saúde da API                                                |
+| GET    | `/v1/cep/{cep}`                  | Endereço do CEP (`01310100` ou `01310-100`)                 |
+| GET    | `/v1/ibge/ufs`                   | 27 UFs com região, ordenadas por nome                       |
+| GET    | `/v1/ibge/ufs/{uf}/municipios`   | Municípios da UF (sigla `SP` ou código `35`), por nome      |
+| GET    | `/v1/cnpj/{cnpj}`                | Validação de formato e dígitos verificadores (sem consulta) |
+| GET    | `/v1/feriados/{ano}`             | Feriados nacionais e pontos facultativos federais do ano    |
+| GET    | `/v1/bancos`                     | Participantes do STR (Banco Central), lista completa        |
+| GET    | `/v1/bancos/{codigo}`            | Banco pelo código COMPE (`1` ou `001`)                      |
+| GET    | `/v1/bancos/ispb/{ispb}`         | Banco pelo ISPB (8 dígitos)                                 |
+| GET    | `/v1/ddd`                        | DDDs em uso, com UFs e total de municípios                  |
+| GET    | `/v1/ddd/{ddd}`                  | Municípios e UFs do DDD (PGCN da Anatel)                    |
+| GET    | `/v1/ddd/municipio/{codigoIbge}` | DDD do município pelo código IBGE                           |
+| GET    | `/v1/projeto/github`             | Resumo do repositório (estrelas, issues, PRs, commits, CI)  |
 
 Exemplos:
 
@@ -34,7 +40,7 @@ const endereco = await res.json();
 ```
 
 Os formatos de resposta são os mesmos da biblioteca (`Endereco`, `Uf`,
-`Municipio`, `CnpjValidationResult`). CNPJ formatado com `/` deve ir sem a barra
+`Municipio`, `CnpjValidationResult`, `Banco`, `Ddd`). CNPJ formatado com `/` deve ir sem a barra
 (ex.: `12ABC34501DE35` ou `12.ABC.34501DE-35`), porque `/` separa a rota.
 
 ## Erros
@@ -64,6 +70,10 @@ de fora; o pedido é bloqueado do mesmo jeito.
 - CEP inexistente: 6 horas no servidor (evita martelar os provedores com CEPs
   inválidos); `max-age=3600`.
 - UFs e municípios: 24 horas.
+- Bancos: a lista inteira do Banco Central (um CSV de ~46 kB) fica 1 hora no
+  servidor (`BANCOS_CACHE_TTL_MS`), então todas as rotas de bancos juntas fazem no
+  máximo uma leitura externa por hora; `max-age=3600`.
+- DDD: sem rede (tabela embutida); `max-age=86400`.
 - Erros de provedor **não** são cacheados.
 - Pedidos simultâneos do mesmo CEP viram uma única consulta externa.
 
