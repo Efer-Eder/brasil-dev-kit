@@ -177,14 +177,14 @@ do push, que aguarda aprovação).
 
 ### Alterações
 
-| Item                                                                                     | Estado                                                  | Evidência                                                         |
-| ---------------------------------------------------------------------------------------- | ------------------------------------------------------- | ----------------------------------------------------------------- |
-| `createBancosClient` (`getByCodigo`, `getByIspb`, `list`), procedência `fonte`           | Implementado e testado                                  | 40 testes com o CSV real gravado; integração contra o BC OK       |
-| `getDdd`, `listDdds`, `getDddPorMunicipio`, `isDddValido`, `normalizeDdd`, `PGCN_VERSAO` | Implementado e testado                                  | tabela comparada com a fixture nos 5571 municípios; integração OK |
-| `scripts/ddd/generate.mjs` (`pnpm data:ddd`), leitor de ZIP sem dependências             | Implementado e testado                                  | gera a mesma tabela a partir da fixture (sha256 conferido)        |
-| Core: `getText` e leitor de CSV                                                          | Implementado e testado                                  | testes em `core/csv-text.test.ts`                                 |
-| Fachada `br.bancos` e `br.ddd`                                                           | Implementado e testado                                  | `kit.test.ts`                                                     |
-| API: 6 rotas novas e OpenAPI                                                             | Implementado e testado; **deploy pendente** (aprovação) | `server/app.test.ts`; Redocly válido                              |
+| Item                                                                                     | Estado                                               | Evidência                                                         |
+| ---------------------------------------------------------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------- |
+| `createBancosClient` (`getByCodigo`, `getByIspb`, `list`), procedência `fonte`           | Implementado e testado                               | 40 testes com o CSV real gravado; integração contra o BC OK       |
+| `getDdd`, `listDdds`, `getDddPorMunicipio`, `isDddValido`, `normalizeDdd`, `PGCN_VERSAO` | Implementado e testado                               | tabela comparada com a fixture nos 5571 municípios; integração OK |
+| `scripts/ddd/generate.mjs` (`pnpm data:ddd`), leitor de ZIP sem dependências             | Implementado e testado                               | gera a mesma tabela a partir da fixture (sha256 conferido)        |
+| Core: `getText` e leitor de CSV                                                          | Implementado e testado                               | testes em `core/csv-text.test.ts`                                 |
+| Fachada `br.bancos` e `br.ddd`                                                           | Implementado e testado                               | `kit.test.ts`                                                     |
+| API: 6 rotas novas e OpenAPI                                                             | Implementado, testado e no ar (deploy de 2026-11-26) | `server/app.test.ts`; Redocly válido                              |
 
 ### Testes executados (2026-11-26, Windows 11, Node 24.16)
 
@@ -207,3 +207,14 @@ do push, que aguarda aprovação).
   integração semanal acusa (a tabela embutida continua funcionando).
 - O cabeçalho do CSV do STR é conferido coluna a coluna: mudança de formato vira
   `ProviderUnavailableError` em vez de dado errado.
+
+### Deploy de 2026-11-26 (aprovado pelo Efer)
+
+- `deploy\deploy.ps1` sem `-Nginx`, porque a rota da API não mudou. Antes de enviar, o script rodou `pnpm run check` (317 testes). O container foi recriado e o health respondeu ok. Backup do app anterior: `/var/backups/brasil-dev-kit/20261126T162749Z`.
+- Validação pública: 29 rotas, com 1,5 s entre os pedidos, às 16:19 UTC (antes) e às 16:28 UTC (depois).
+  - Hub, os outros projetos publicados no domínio (inclusive Agent Orchestra e Brasil Tax Playground), `/ponto.js`, `/api/naoexiste` e as rotas que já existiam no Brasil Dev Kit: **mesmo status antes e depois**.
+  - Rotas novas, que antes respondiam 404:
+    - `/v1/bancos`, `/v1/bancos/260`, `/v1/bancos/ispb/00000000`, `/v1/ddd`, `/v1/ddd/11` e `/v1/ddd/municipio/3550308` passaram a 200.
+    - `/v1/ddd/10` passou a 400 (`VALIDATION_ERROR`).
+    - `/v1/bancos/999` e `/v1/ddd/29` seguem em 404, agora com o JSON da própria API.
+  - `/v1/openapi.json` no ar com 14 paths, entre eles os 6 novos; o índice `/` lista as rotas novas.
