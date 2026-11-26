@@ -23,8 +23,9 @@
 
 ---
 
-CEP, UFs e municípios do IBGE, feriados nacionais e validação de CNPJ (inclusive
-o **alfanumérico**) num **SDK TypeScript** e numa **API HTTP pública**. Cada
+CEP, UFs e municípios do IBGE, bancos (código COMPE e ISPB), DDD, feriados
+nacionais e validação de CNPJ (inclusive o **alfanumérico**) num **SDK TypeScript**
+e numa **API HTTP pública**. Cada
 resposta diz de onde veio o dado, todo erro tem um código estável e nada depende
 de chave paga.
 
@@ -55,12 +56,15 @@ tem um playground que chama a API ao vivo.
 | ------------- | ---------------------------------------------------------------------- | --------------------------------------------------- | ----- |
 | **CEP**       | Endereço normalizado, com o provedor que respondeu                     | ViaCEP, com fallback para BrasilAPI                 | sim   |
 | **IBGE**      | 27 UFs e os municípios de cada uma, com divisões regionais             | API de Localidades do IBGE                          | sim   |
+| **Bancos**    | Instituição pelo código COMPE ou ISPB, e a lista completa              | Participantes do STR, Banco Central (diária)        | sim   |
+| **DDD**       | Municípios e UFs de cada DDD, e o DDD de cada município                | PGCN da Anatel (tabela embutida)                    | não   |
 | **Feriados**  | Feriados nacionais e pontos facultativos federais do ano               | Leis federais e portarias anuais do governo federal | não   |
 | **CNPJ**      | Formato e dígitos verificadores, numérico e alfanumérico               | Manual oficial de DV (IN RFB nº 2.229/2024)         | não   |
 | **Core HTTP** | Timeout, `AbortSignal`, retries com backoff, cache TTL e erros tipados |                                                     |       |
 
 Detalhes e fontes de cada módulo: [CEP](docs/cep.md) · [IBGE](docs/ibge.md) ·
-[Feriados](docs/feriados.md) · [CNPJ](docs/cnpj.md).
+[Bancos](docs/bancos.md) · [DDD](docs/ddd.md) · [Feriados](docs/feriados.md) ·
+[CNPJ](docs/cnpj.md).
 
 ## No seu código
 
@@ -90,13 +94,15 @@ await br.ibge.listMunicipios('RR'); // 15 municípios, ordenados por nome
 br.feriados.getNacionais(2026).origem; // 'portaria': feriados + pontos facultativos oficiais
 br.feriados.isFeriado('2026-11-20'); // true
 br.cnpj.validate('12.ABC.345/01DE-35').kind; // 'alphanumeric'
+(await br.bancos.getByCodigo('260'))?.nomeReduzido; // 'NU PAGAMENTOS - IP'
+br.ddd.get('61')?.ufs; // ['DF', 'GO']
 ```
 
 Falha passageira (rede, 5xx, timeout, 429) é repetida com backoff exponencial e
 jitter. Ajuste por módulo, por exemplo
 `createBrasilDevKit({ retry: { retries: 3 }, cep: { providers: ['brasilapi'] } })`.
 Cada módulo também pode ser usado sozinho (`createCepClient`, `createIbgeClient`,
-`getFeriadosNacionais`, `validateCnpj`…).
+`createBancosClient`, `getDdd`, `getFeriadosNacionais`, `validateCnpj`…).
 
 > [!IMPORTANT]
 > A validação de CNPJ confere **apenas formato e dígitos verificadores**. Ela não
@@ -149,6 +155,9 @@ Todos herdam de `BrasilDevKitError`.
 - CNPJ: só formato e dígitos verificadores, sem consulta cadastral.
 - CEP: dados do ViaCEP e da BrasilAPI, que podem divergir e limitar uso massivo.
 - Feriados: só nacionais e pontos facultativos federais; estaduais e municipais não.
+- Bancos: só os participantes do STR; a lista do Pix não tem fonte estável e ficou de fora.
+- DDD: tabela embutida com a versão do PGCN de 23/11/2026 (`PGCN_VERSAO`); mudanças
+  da Anatel entram numa nova versão do pacote.
 - API pública: gratuita e sem SLA. Para uso intenso, rode o SDK no seu serviço.
 
 ## Rodando localmente
@@ -172,7 +181,7 @@ com saídas reais da API e do SDK.
 
 - [API pública: rotas, erros e capacidade](docs/api.md) · [OpenAPI](docs/openapi.json) · [Deploy](docs/deploy.md)
 - [Como publicar no npm](docs/release.md) · [Guide in English](docs/en/README.md)
-- [CEP](docs/cep.md) · [IBGE](docs/ibge.md) · [Feriados](docs/feriados.md) · [CNPJ](docs/cnpj.md)
+- [CEP](docs/cep.md) · [IBGE](docs/ibge.md) · [Bancos](docs/bancos.md) · [DDD](docs/ddd.md) · [Feriados](docs/feriados.md) · [CNPJ](docs/cnpj.md)
 - [Arquitetura](docs/architecture.md) · [Decisões (ADRs)](docs/adr/)
 - [Progresso](PROGRESS.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md)
 

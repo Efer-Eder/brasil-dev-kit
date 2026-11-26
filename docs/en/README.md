@@ -48,6 +48,8 @@ Field names are Portuguese on purpose (`municipio`, `logradouro`, `bairro`,
 | ---------- | ------------- | --------------------------------------------------- |
 | `cep`      | yes           | ViaCEP, falling back to BrasilAPI                   |
 | `ibge`     | yes           | IBGE Localidades API (official)                     |
+| `bancos`   | yes           | STR participants list, Banco Central (daily file)   |
+| `ddd`      | no            | Anatel PGCN numbering plan (bundled table)          |
 | `feriados` | no            | Federal laws and yearly federal decrees (portarias) |
 | `cnpj`     | no            | Official check-digit manual (IN RFB nº 2.229/2024)  |
 
@@ -61,6 +63,21 @@ Field names are Portuguese on purpose (`municipio`, `logradouro`, `bairro`,
 | Full validation | `validateCnpj` / `isValidCnpj` | Syntax + check digits, with a failure reason.                                       |
 | Format          | `formatCnpj`                   | `XX.XXX.XXX/XXXX-XX`; `{ checkDigits: false }` formats syntax-valid input.          |
 | Registry lookup | **not provided**               | Only Receita Federal can tell whether a company exists or is active.                |
+
+### Banks and area codes (DDD)
+
+`createBancosClient()` reads the official STR participants list (one CSV, updated
+daily, ODbL) and looks institutions up by COMPE code (`getByCodigo('260')`) or ISPB
+(`getByIspb('18236120')`), keeping the list in memory for one hour by default.
+Participants without a clearing code return `codigo: null`. The Pix participants
+list is not included: its file name changes every day and it is not in the open
+data portal.
+
+`getDdd('61')` returns the municipalities and states for an area code (some codes
+cross state lines: 61 covers DF and GO), `getDddPorMunicipio('3550308')` returns a
+city's code and `listDdds({ uf: 'SC' })` lists the codes in a state. The table is
+bundled from Anatel's PGCN file (public domain, 23 Nov 2026, 5,571 municipalities);
+`pnpm data:ddd` regenerates it and the integration test flags drift.
 
 ### Holidays
 
@@ -123,6 +140,8 @@ or critical use, run the SDK in your own service.
 - CEP data comes from third-party services (ViaCEP, BrasilAPI); their databases
   can differ, and they may rate limit or block heavy use.
 - Holidays: only national holidays and federal optional days off.
+- Banks: STR participants only (no Pix list). DDD: bundled table, updated with new
+  package versions.
 - Not on npm yet; the API has no SLA.
 
 ## FAQ

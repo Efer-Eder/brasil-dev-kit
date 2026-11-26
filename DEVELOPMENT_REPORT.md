@@ -164,3 +164,46 @@ do push, que aguarda aprovação).
 - Conta e token do npm são do mantenedor (não ficam no repositório).
 - Provedores de CEP são terceiros, sem SLA; a API pública também não tem SLA.
 - Imagens absolutas no README dependem do caminho `main/docs/assets/readme/`.
+
+## 8. Rodada 2026-11-26: bancos e DDD
+
+### Fontes conferidas antes do código
+
+| Módulo | Fonte oficial                                                                                      | Licença / termos                     | Estado                                                      |
+| ------ | -------------------------------------------------------------------------------------------------- | ------------------------------------ | ----------------------------------------------------------- |
+| Bancos | Lista de Participantes do STR, BCB/Deban (dadosabertos.bcb.gov.br), CSV diário                     | ODbL (portal de dados abertos do BC) | Implementado e testado                                      |
+| DDD    | PGCN da Anatel (dados.gov.br, conjunto `codigos-nacionais-cn`), ZIP com CSV, arquivo de 23/11/2026 | Other (Public Domain)                | Implementado e testado                                      |
+| Pix    | CSV com a data no nome, só o do dia no ar, sem entrada no portal de dados abertos                  | só os termos gerais do site do BC    | **Bloqueado** (sem URL estável e documentada; sem scraping) |
+
+### Alterações
+
+| Item                                                                                     | Estado                                                  | Evidência                                                         |
+| ---------------------------------------------------------------------------------------- | ------------------------------------------------------- | ----------------------------------------------------------------- |
+| `createBancosClient` (`getByCodigo`, `getByIspb`, `list`), procedência `fonte`           | Implementado e testado                                  | 40 testes com o CSV real gravado; integração contra o BC OK       |
+| `getDdd`, `listDdds`, `getDddPorMunicipio`, `isDddValido`, `normalizeDdd`, `PGCN_VERSAO` | Implementado e testado                                  | tabela comparada com a fixture nos 5571 municípios; integração OK |
+| `scripts/ddd/generate.mjs` (`pnpm data:ddd`), leitor de ZIP sem dependências             | Implementado e testado                                  | gera a mesma tabela a partir da fixture (sha256 conferido)        |
+| Core: `getText` e leitor de CSV                                                          | Implementado e testado                                  | testes em `core/csv-text.test.ts`                                 |
+| Fachada `br.bancos` e `br.ddd`                                                           | Implementado e testado                                  | `kit.test.ts`                                                     |
+| API: 6 rotas novas e OpenAPI                                                             | Implementado e testado; **deploy pendente** (aprovação) | `server/app.test.ts`; Redocly válido                              |
+
+### Testes executados (2026-11-26, Windows 11, Node 24.16)
+
+| Comando                               | Resultado                                                               |
+| ------------------------------------- | ----------------------------------------------------------------------- |
+| `pnpm run check`                      | lint 100 arquivos sem avisos; typecheck OK; **317 testes**; build OK    |
+| `pnpm test:integration`               | 9 testes OK (CEP, IBGE, Banco Central e Anatel reais)                   |
+| `pnpm run test:package`               | 6 etapas OK                                                             |
+| `pnpm test:coverage`                  | 96,57% instruções, 93,87% ramos, 97,08% funções, 98,48% linhas (`src/`) |
+| `npm pack --dry-run`                  | 11 arquivos, 319,9 kB compactado, 939,4 kB descompactado                |
+| `publint` / `attw` / `pnpm audit`     | All good / No problems found / nenhuma vulnerabilidade                  |
+| `@redocly/cli lint docs/openapi.json` | válida                                                                  |
+
+### Riscos
+
+- O pacote ficou maior por causa da tabela de DDD (nomes dos municípios). O
+  `sideEffects: false` mantém a tabela fora do bundle de quem não usa DDD
+  (bundle só com CNPJ: 6,4 kB; só com DDD: 130 kB, medido com esbuild).
+- A URL do ZIP do PGCN mudou de caminho desde 2016; se mudar de novo, o teste de
+  integração semanal acusa (a tabela embutida continua funcionando).
+- O cabeçalho do CSV do STR é conferido coluna a coluna: mudança de formato vira
+  `ProviderUnavailableError` em vez de dado errado.

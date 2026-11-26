@@ -23,8 +23,8 @@
 
 ---
 
-CEP (Brazilian postal codes), IBGE states and municipalities, national holidays
-and CNPJ (company tax ID) validation, including the new **alphanumeric** CNPJ, in a
+CEP (Brazilian postal codes), IBGE states and municipalities, banks (COMPE code
+and ISPB), area codes (DDD), national holidays and CNPJ (company tax ID) validation, including the new **alphanumeric** CNPJ, in a
 **TypeScript SDK** and a **public HTTP API**. Every response says where the data
 came from, every error has a stable code, and nothing depends on a paid key.
 
@@ -55,13 +55,16 @@ playground that calls the API live.
 | ------------- | ------------------------------------------------------------------------ | -------------------------------------------------- | -------- |
 | **CEP**       | Normalized address, with the provider that answered                      | ViaCEP, falling back to BrasilAPI                  | yes      |
 | **IBGE**      | The 27 states and their municipalities, with regional divisions          | IBGE Localidades API                               | yes      |
+| **Banks**     | Institution by COMPE code or ISPB, and the full list                     | STR participants, Banco Central (daily)            | yes      |
+| **DDD**       | Municipalities and states for each area code, and each city's code       | Anatel PGCN numbering plan (bundled table)         | no       |
 | **Holidays**  | National holidays and federal optional days off for a year               | Federal laws and yearly federal decrees            | no       |
 | **CNPJ**      | Format and check digits, numeric and alphanumeric                        | Official check-digit manual (IN RFB nº 2.229/2024) | no       |
 | **HTTP core** | Timeout, `AbortSignal`, retries with backoff, TTL cache and typed errors |                                                    |          |
 
 Field names in responses are in Portuguese (`municipio`, `logradouro`, `fonte`…),
 matching the official sources. Module docs (pt-BR): [CEP](docs/cep.md) ·
-[IBGE](docs/ibge.md) · [Holidays](docs/feriados.md) · [CNPJ](docs/cnpj.md).
+[IBGE](docs/ibge.md) · [Banks](docs/bancos.md) · [DDD](docs/ddd.md) ·
+[Holidays](docs/feriados.md) · [CNPJ](docs/cnpj.md).
 
 ## In your code
 
@@ -91,13 +94,15 @@ await br.ibge.listMunicipios('RR'); // 15 municipalities, sorted by name
 br.feriados.getNacionais(2026).origem; // 'portaria': official holidays + optional days off
 br.feriados.isFeriado('2026-11-20'); // true
 br.cnpj.validate('12.ABC.345/01DE-35').kind; // 'alphanumeric'
+(await br.bancos.getByCodigo('260'))?.nomeReduzido; // 'NU PAGAMENTOS - IP'
+br.ddd.get('61')?.ufs; // ['DF', 'GO']
 ```
 
 Transient failures (network, 5xx, timeout, 429) are retried with exponential
 backoff and jitter. Tune it per module, e.g.
 `createBrasilDevKit({ retry: { retries: 3 }, cep: { providers: ['brasilapi'] } })`.
 Each module also works on its own (`createCepClient`, `createIbgeClient`,
-`getFeriadosNacionais`, `validateCnpj`…).
+`createBancosClient`, `getDdd`, `getFeriadosNacionais`, `validateCnpj`…).
 
 > [!IMPORTANT]
 > CNPJ validation checks **format and check digits only**. It does not tell you
@@ -148,6 +153,9 @@ All of them extend `BrasilDevKitError`.
 - ESM + CommonJS package with types and no runtime dependencies; **not on npm yet**
   (prepared, see [docs/release.md](docs/release.md)).
 - CNPJ: format and check digits only, no registry lookup.
+- Banks: STR participants only; the Pix participants list has no stable source and is left out.
+- DDD: bundled table from the 2026-11-23 PGCN file (`PGCN_VERSAO`); Anatel changes
+  ship in a new package version.
 - CEP: data from ViaCEP and BrasilAPI, which can differ and limit heavy use.
 - Holidays: national ones and federal optional days off only.
 - Public API: free, no SLA. For heavy use, run the SDK in your own service.
@@ -177,7 +185,7 @@ and SDK output.
 Module docs (pt-BR):
 
 - [Public API: routes, errors and capacity](docs/api.md) · [Deploy](docs/deploy.md)
-- [CEP](docs/cep.md) · [IBGE](docs/ibge.md) · [Holidays](docs/feriados.md) · [CNPJ](docs/cnpj.md)
+- [CEP](docs/cep.md) · [IBGE](docs/ibge.md) · [Banks](docs/bancos.md) · [DDD](docs/ddd.md) · [Holidays](docs/feriados.md) · [CNPJ](docs/cnpj.md)
 - [Architecture](docs/architecture.md) · [Decisions (ADRs)](docs/adr/)
 - [Progress](PROGRESS.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md)
 
