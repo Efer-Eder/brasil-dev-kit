@@ -20,8 +20,15 @@ verificação das fontes oficiais.
 - [x] Testes de integração para IBGE
 - [ ] Incluir a portaria de 2027 quando for publicada
 - [ ] Exemplos Node.js e demo web mínima (CEP, municípios, feriados)
-- [ ] Definir nome do pacote no npm e configurar changesets
-- [ ] Critérios de aceite da v0.1.0 cumpridos antes de qualquer publicação
+- [x] Nome do pacote no npm (`brasil-dev-kit`) e publicação da v0.1.0 com
+      proveniência (2026-11-26)
+- [x] Critérios de aceite da v0.1.0 cumpridos antes da publicação
+- [ ] Changesets ou outro fluxo de versão (hoje a versão sobe à mão, via PR)
+
+## v0.2.0
+
+- [ ] Publicar bancos e DDD no npm (já estão na API pública e na `main`)
+- [ ] Publicação sem token (Trusted Publishing configurado)
 
 ## Depois do MVP
 

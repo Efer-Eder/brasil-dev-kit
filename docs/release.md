@@ -12,6 +12,22 @@ deste workflow). Requisitos do npm: CLI 11.5.1 ou mais nova (o workflow confere)
 Node 22.14 ou mais novo, runner hospedado pelo GitHub e `repository.url` do
 `package.json` igual ao repositório.
 
+## Histórico
+
+- **0.1.0 (2026-11-26):** publicada pelo workflow na tag `v0.1.0` com o token
+  temporário (`NPM_BOOTSTRAP_TOKEN`), porque o nome ainda não existia no npm.
+  O npm aplicou publicação em etapas: primeiro apareceu só o marcador
+  `0.0.0-stage` e a 0.1.0 entrou minutos depois. Proveniência SLSA v1 do commit
+  `cfcd43f`; `npm audit signatures` confere 1 attestation.
+- Depois da 0.1.0 falta: apagar o segredo `NPM_BOOTSTRAP_TOKEN`, revogar o token no
+  npm e configurar o publicador confiável (seção abaixo). A 0.2.0 já deve sair sem
+  token.
+- A página do pacote no site do npm mostrou "This package does not have a README"
+  logo depois da 0.1.0, embora o README vá no pacote e o registro já o tenha no
+  documento do pacote (campos `readme` e `readmeFilename`). O site monta a página a
+  partir da primeira publicação (o marcador `0.0.0-stage`, que não tem README) e
+  só atualiza num evento novo do pacote; a expectativa é que a 0.2.0 resolva.
+
 ## Checklist antes de publicar
 
 ```powershell

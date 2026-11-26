@@ -23,7 +23,7 @@ projeto adota o [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 - API: `/v1/bancos`, `/v1/bancos/{codigo}`, `/v1/bancos/ispb/{ispb}`, `/v1/ddd`,
   `/v1/ddd/{ddd}` e `/v1/ddd/municipio/{codigoIbge}`, na especificação OpenAPI.
 
-## [0.1.0] - 2026-11-21
+## [0.1.0] - 2026-11-26
 
 Primeira versão publicada no npm.
 
